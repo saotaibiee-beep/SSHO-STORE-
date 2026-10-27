@@ -188,7 +188,29 @@ function applyTelegramUser(){
  catch(e){}
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
-renderProducts();renderOrders();applyTelegramUser();
+async function loadProducts(){
+  const grid = document.getElementById("productsGrid");
+  try {
+    const response = await fetch("/api/products", { cache: "no-store" });
+    if (!response.ok) throw new Error("Failed to load products");
+    const data = await response.json();
+    products = (Array.isArray(data.products) ? data.products : []).map(p => ({
+      id: String(p.id || p.slug || ""),
+      name: String(p.name || "منتج"),
+      cat: String(p.category || "عام"),
+      duration: String(p.description || ""),
+      price: Number(p.price || 0),
+      icon: "spark",
+      desc: String(p.description || "")
+    }));
+    renderProducts();
+  } catch (error) {
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:25px">تعذر تحميل المنتجات. أعد تحميل الصفحة.</div>';
+  }
+}
+loadProducts();
+renderOrders();
+applyTelegramUser();
 </script>
 </body>
 </html>
