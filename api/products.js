@@ -15,7 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `${url}/rest/v1/products?select=id,slug,name,description,image_url,price,currency,category,available,active,stock_count&active=eq.true&available=eq.true`,
+     `${url}/rest/v1/products?select=id,slug,name,description,image_url,price,currency,category,available,active,stock_count&active=eq.true&available=eq.true`,
       {
         headers: {
           apikey: key,
