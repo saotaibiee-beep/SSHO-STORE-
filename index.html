@@ -113,14 +113,7 @@ button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:tran
    Production: set API_BASE to your HTTPS backend, verify Telegram initData server-side,
    and never put bot tokens, database service-role keys, or payment secrets in this file. */
 const API_BASE = ""; // Example: https://api.your-domain.com
-const products = [
- {id:"ai-month",name:"AI Premium",cat:"ذكاء اصطناعي",duration:"اشتراك لمدة شهر",price:8.99,icon:"spark",desc:"اشتراك رقمي لأدوات الذكاء الاصطناعي. تفاصيل التفعيل النهائية يحددها مخزونك."},
- {id:"gemini-month",name:"Gemini Advanced",cat:"ذكاء اصطناعي",duration:"اشتراك لمدة شهر",price:7.50,icon:"gemini",desc:"منتج رقمي تجريبي قابل للتعديل من لوحة الإدارة بعد ربط الخادم."},
- {id:"video-month",name:"Video Editor Pro",cat:"مونتاج وتصميم",duration:"اشتراك لمدة شهر",price:5.99,icon:"video",desc:"أدوات مونتاج وتصميم رقمية. يلزم تأكيد نوع الترخيص ومصدره قبل البيع."},
- {id:"design-month",name:"Design Suite",cat:"مونتاج وتصميم",duration:"اشتراك لمدة شهر",price:6.50,icon:"design",desc:"حزمة تصميم تجريبية، استبدلها بالمنتج والترخيص المعتمدين."},
- {id:"iptv-month",name:"IPTV Package",cat:"ترفيه",duration:"اشتراك لمدة شهر",price:4.99,icon:"play",desc:"عنصر واجهة تجريبي. لا تدرج إلا خدمات تملك حق توزيعها."},
- {id:"gift-card",name:"Digital Gift Card",cat:"بطاقات رقمية",duration:"تسليم بعد تأكيد الطلب",price:10,icon:"gift",desc:"بطاقة رقمية تجريبية؛ التسليم في هذا النموذج يدوي بعد تأكيد الدفع."}
-];
+let products = [];];
 const iconSvgs={
  spark:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m24 5 4.5 14L43 24l-14.5 5L24 43l-5-14L5 24l14-5 5-14Z" stroke-linejoin="round"/><path d="m37 5 1.5 4.5L43 11l-4.5 1.5L37 17l-1.5-4.5L31 11l4.5-1.5L37 5Z"/></svg>',
  gemini:'<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M24 4c2.6 10 10 17.4 20 20-10 2.6-17.4 10-20 20C21.4 34 14 26.6 4 24 14 21.4 21.4 14 24 4Z" stroke-linejoin="round"/></svg>',
