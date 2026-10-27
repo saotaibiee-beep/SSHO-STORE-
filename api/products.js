@@ -24,11 +24,7 @@ export default async function handler(req, res) {
       }
     );
 
-    if (!response.ok) {
-      return res.status(502).json({
-        error: "Could not load products"
-      });
-    }
+    if (!response.ok) return res.status(502).json({ error: "Could not load products", details: await response.text() });
 
     const products = await response.json();
     return res.status(200).json({ products });
