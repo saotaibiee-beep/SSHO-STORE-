@@ -147,11 +147,42 @@ function showProduct(id){
  openModal();
 }
 async function requestPurchase(id){
- const p=products.find(x=>x.id===id);if(!p)return;
- if(!API_BASE){closeModal();showToast("الشراء الحقيقي غير مفعّل بعد — اربط الخادم أولاً");return}
- const initData=window.Telegram?.WebApp?.initData||"";
- if(!initData){showToast("افتح المتجر من داخل تيليجرام");return}
- try{const r=await fetch(API_BASE+"/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({productId:id})});if(!r.ok)throw Error();const d=await r.json();closeModal();showToast("تم إنشاء الطلب رقم "+(d.orderId||""));go("orders")}catch(e){showToast("تعذر إنشاء الطلب، حاول لاحقاً")}
+const p=products.find(x=>x.id===id);
+if(!p)return;
+
+const initData=window.Telegram?.WebApp?.initData||"";
+if(!initData){
+showToast("افتح المتجر من داخل تيليجرام");
+return;
+}
+
+const idempotencyKey=window.crypto?.randomUUID
+?window.crypto.randomUUID()
+:"order-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+
+try{
+const r=await fetch("/api/orders",{
+method:"POST",
+headers:{
+"Content-Type":"application/json",
+"Authorization":"tma "+initData
+},
+body:JSON.stringify({
+productId:id,
+idempotencyKey:idempotencyKey
+})
+});
+
+const d=await r.json().catch(()=>({}));
+if(!r.ok)throw new Error(d.error||"تعذر إنشاء الطلب");
+
+closeModal();
+showToast("تم تسجيل الطلب بنجاح");
+go("orders");
+}catch(e){
+console.error("Purchase error:",e);
+showToast(e.message||"تعذر إنشاء الطلب، حاول لاحقاً");
+}
 }
 function filterOrders(f,el){orderFilter=f;document.querySelectorAll("#orderTabs .tab").forEach(b=>b.classList.remove("active"));el.classList.add("active");renderOrders()}
 function renderOrders(){
