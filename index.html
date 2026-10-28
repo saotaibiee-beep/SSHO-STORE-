@@ -279,11 +279,144 @@ function chooseMethod(el){document.querySelectorAll(".method").forEach(b=>b.clas
 function chooseAmount(n,el){quickAmount=n;document.querySelectorAll(".amount").forEach(b=>b.classList.remove("active"));el.classList.add("active");document.getElementById("customAmount").value=""}
 function clearQuickAmount(){document.querySelectorAll(".amount").forEach(b=>b.classList.remove("active"));quickAmount=null}
 async function createDepositRequest(){
- const raw=document.getElementById("customAmount").value;const amount=raw?Number(raw):Number(quickAmount);
- if(!Number.isFinite(amount)||amount<1||amount>10000){showToast("أدخل مبلغاً بين 1 و10,000 USDT");return}
- if(!API_BASE){showToast("نموذج فقط: لم يتم إنشاء طلب شحن حقيقي");openInfo("طلب شحن تجريبي",`المبلغ: ${money(amount)} USDT<br>الطريقة: ${escapeHtml(selectedMethod)}<br><br>لم يتم تسجيل الطلب أو استقبال أموال. يلزم ربط الخادم ومزود الدفع.`);return}
+ const raw=document.getElementById("customAmount").value;
+ const amount=raw?Number(raw):Number(quickAmount);
+
+ if(!Number.isFinite(amount)||amount<1||amount>10000){
+   showToast("أدخل مبلغاً بين 1 و10,000 USDT");
+   return;
+ }
+
+ if(!API_BASE){
+   showToast("نموذج فقط: لم يتم إنشاء طلب شحن حقيقي");
+   return;
+ }
+
  const initData=window.Telegram?.WebApp?.initData||"";
- try{const r=await fetch(API_BASE+"/api/deposits",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({amount,method:selectedMethod})});if(!r.ok)throw Error();const d=await r.json();openInfo("تم إنشاء طلب الشحن",`رقم الطلب: ${escapeHtml(d.depositId||"—")}<br>المبلغ: ${money(amount)} USDT<br>الطريقة: ${escapeHtml(selectedMethod)}`)}catch(e){showToast("تعذر إنشاء طلب الشحن")}
+
+ if(!initData){
+   showToast("افتح المتجر من داخل تيليجرام");
+   return;
+ }
+
+ try{
+   const r=await fetch(API_BASE+"/api/deposits",{
+     method:"POST",
+     headers:{
+       "Content-Type":"application/json",
+       "Authorization":"tma "+initData
+     },
+     body:JSON.stringify({
+       amount:amount,
+       method:selectedMethod
+     })
+   });
+
+   const d=await r.json().catch(()=>({}));
+
+   if(!r.ok){
+     throw new Error(d.error||"تعذر إنشاء طلب الشحن");
+   }
+
+   if(selectedMethod==="USDT BEP20"){
+     document.getElementById("modalTitle").textContent="التحقق من تحويل BEP20";
+
+     document.getElementById("modalBody").innerHTML=
+       '<div class="notice">تم إنشاء طلب الشحن فقط. لم تتم إضافة أي رصيد. أدخل رقم المعاملة بعد إتمام التحويل، ولا ترسل أموالاً قبل التأكد من عنوان الاستقبال والشبكة والعملة.</div>'+
+       '<div class="subtext">رقم طلب الشحن</div>'+
+       '<div style="direction:ltr;text-align:left;margin:8px 0 14px;font-weight:800">'+
+       escapeHtml(String(d.depositId||""))+
+       '</div>'+
+       '<label class="subtext" for="bep20TxHash">رقم المعاملة (Transaction Hash)</label>'+
+       '<input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x...">'+
+       '<button class="primary wide" onclick="verifyBep20Deposit('+Number(d.depositId)+')">تحقق من المعاملة</button>'+
+       '<button class="secondary wide" onclick="closeModal()">إغلاق</button>';
+
+     openModal();
+   }else{
+     openInfo(
+       "تم إنشاء طلب الشحن",
+       "رقم الطلب: "+escapeHtml(String(d.depositId||"—"))+
+       "<br>المبلغ: "+money(amount)+" USDT"+
+       "<br>الطريقة: "+escapeHtml(selectedMethod)+
+       "<br><br>الطلب مسجل، لكن الدفع لم يُتحقق منه ولم يُضف أي رصيد."
+     );
+   }
+ }catch(e){
+   console.error("Create deposit failed:",e);
+   showToast(e.message||"تعذر إنشاء طلب الشحن");
+ }
+}
+
+async function verifyBep20Deposit(depositId){
+ const input=document.getElementById("bep20TxHash");
+ const txHash=(input?.value||"").trim();
+
+ if(!/^0x[0-9a-fA-F]{64}$/.test(txHash)){
+   showToast("أدخل رقم معاملة صحيحاً");
+   return;
+ }
+
+ const initData=window.Telegram?.WebApp?.initData||"";
+
+ if(!initData){
+   showToast("افتح المتجر من داخل تيليجرام");
+   return;
+ }
+
+ const button=document.querySelector("#modalBody button.primary");
+
+ if(button){
+   button.disabled=true;
+   button.textContent="جارٍ التحقق...";
+ }
+
+ try{
+   const r=await fetch(API_BASE+"/api/verify-bep20",{
+     method:"POST",
+     headers:{
+       "Content-Type":"application/json",
+       "Authorization":"tma "+initData
+     },
+     body:JSON.stringify({
+       depositId:depositId,
+       txHash:txHash
+     })
+   });
+
+   const d=await r.json().catch(()=>({}));
+
+   if(!r.ok&&r.status!==202){
+     throw new Error(d.error||"تعذر التحقق من المعاملة");
+   }
+
+   if(d.status==="awaiting_confirmations"){
+     openInfo(
+       "المعاملة تنتظر التأكيدات",
+       "عدد التأكيدات: "+Number(d.confirmations||0)+
+       " من "+Number(d.requiredConfirmations||15)+
+       "<br><br>لم يُضف أي رصيد. انتظر ثم أعد المحاولة."
+     );
+     return;
+   }
+
+   openInfo(
+     "المعاملة قيد المراجعة",
+     "اجتازت المعاملة فحوصات الشبكة الأولية."+
+     "<br>سيبقى الطلب قيد المراجعة."+
+     "<br><br><strong>لم يُضف أي رصيد تلقائياً.</strong>"
+   );
+ }catch(e){
+   console.error("BEP20 verification failed:",e);
+   showToast(e.message||"تعذر التحقق من المعاملة");
+ }finally{
+   const currentButton=document.querySelector("#modalBody button.primary");
+
+   if(currentButton){
+     currentButton.disabled=false;
+     currentButton.textContent="تحقق من المعاملة";
+   }
+ }
 }
 function toggleSwitch(el,type){el.classList.toggle("on");if(type==="hideBalance"){hideBalance=el.classList.contains("on");document.body.classList.toggle("hide-balance",hideBalance)}else{notificationsEnabled=el.classList.contains("on");showToast(notificationsEnabled?"تم تفعيل التفضيل محلياً":"تم إيقاف التفضيل محلياً")}}
 function openModal(){document.getElementById("modalBackdrop").classList.add("open");document.body.style.overflow="hidden"}
