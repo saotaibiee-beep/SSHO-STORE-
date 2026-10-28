@@ -1,11 +1,10 @@
-
 import { verifyTelegramInitData } from "./_lib/telegram.js";
 
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  if (req.method !== "POST") {
-    res.setHeader("Allow", "POST");
+  if (req.method !== "POST" && req.method !== "GET") {
+    res.setHeader("Allow", "GET, POST");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -20,8 +19,11 @@ export default async function handler(req, res) {
   }
 
   const authorization = req.headers.authorization || "";
+
   if (!authorization.startsWith("tma ")) {
-    return res.status(401).json({ error: "Telegram authorization required" });
+    return res.status(401).json({
+      error: "Telegram authorization required"
+    });
   }
 
   const user = verifyTelegramInitData(
@@ -34,45 +36,49 @@ export default async function handler(req, res) {
       error: "Invalid or expired Telegram session"
     });
   }
-if (req.method === "GET") {
-try {
-const baseUrl = supabaseUrl.replace(//+$/, "");
-const query = new URLSearchParams({
-select: "id,order_number,product_name,unit_price,currency,status,created_at",
-telegram_id: "eq.${user.id}",
-order: "created_at.desc",
-limit: "100"
-});
 
-  const response = await fetch(
-    `${baseUrl}/rest/v1/orders?${query.toString()}`,
-    {
-      method: "GET",
-      headers: {
-        "apikey": serviceKey,
-        "Authorization": `Bearer ${serviceKey}`
+  const baseUrl = supabaseUrl.replace(/\/+$/, "");
+
+  if (req.method === "GET") {
+    try {
+      const query = new URLSearchParams({
+        select: "id,order_number,product_name,unit_price,currency,status,created_at",
+        telegram_id: `eq.${user.id}`,
+        order: "created_at.desc",
+        limit: "100"
+      });
+
+      const response = await fetch(
+        `${baseUrl}/rest/v1/orders?${query.toString()}`,
+        {
+          method: "GET",
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`
+          }
+        }
+      );
+
+      const result = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        console.error("Fetch orders failed", response.status);
+        return res.status(502).json({
+          error: "Could not fetch orders"
+        });
       }
+
+      return res.status(200).json({
+        orders: result || []
+      });
+    } catch (error) {
+      console.error("Fetch orders request failed", error?.message);
+      return res.status(502).json({
+        error: "Order service temporarily unavailable"
+      });
     }
-  );
-
-  const result = await response.json().catch(() => null);
-
-  if (!response.ok) {
-    console.error("Fetch orders failed", response.status);
-    return res.status(502).json({
-      error: "Could not fetch orders"
-    });
   }
 
-  return res.status(200).json({ orders: result || [] });
-} catch (error) {
-  console.error("Fetch orders request failed", error?.message);
-  return res.status(502).json({
-    error: "Order service temporarily unavailable"
-  });
-}
-
-}
   const { productId, idempotencyKey } = req.body || {};
 
   if (
@@ -82,20 +88,20 @@ limit: "100"
     idempotencyKey.length < 16 ||
     idempotencyKey.length > 100
   ) {
-    return res.status(400).json({ error: "Invalid order request" });
+    return res.status(400).json({
+      error: "Invalid order request"
+    });
   }
 
   try {
-    const baseUrl = supabaseUrl.replace(/\/+$/, "");
-
     const response = await fetch(
       `${baseUrl}/rest/v1/rpc/create_store_order`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "apikey": serviceKey,
-          "Authorization": `Bearer ${serviceKey}`
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`
         },
         body: JSON.stringify({
           p_telegram_id: user.id,
