@@ -238,10 +238,23 @@ export default async function handler(req, res) {
     const updated = await updateResponse.json();
 
     if (!updateResponse.ok || !Array.isArray(updated) || !updated.length) {
-      return reply(res, 502, {
-        error: "Could not record the transaction. No balance was added."
-      });
-    }
+  if (updateResponse.status === 409 ||
+      updateResponse.status === 400) {
+    return reply(res, 409, {
+      error: "This transaction may already be linked to another deposit. No balance was added."
+    });
+  }
+
+  console.error(
+    "Deposit update failed:",
+    updateResponse.status,
+    JSON.stringify(updated).slice(0, 500)
+  );
+
+  return reply(res, 502, {
+    error: "Could not record the transaction. No balance was added."
+  });
+}
 
     return reply(res, 200, {
       status: "pending_verification",
