@@ -136,7 +136,7 @@ function setCategory(cat,el){activeCategory=cat;document.querySelectorAll(".cat"
 function go(page){
  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- if(page==="orders")renderOrders();if(page==="account")updateStats();
+if(page==="orders")loadOrders();if(page==="account")updateStats();
  window.scrollTo({top:0,behavior:"smooth"});
  try{if(window.Telegram?.WebApp?.HapticFeedback)Telegram.WebApp.HapticFeedback.selectionChanged()}catch(e){}
 }
@@ -183,6 +183,52 @@ go("orders");
 console.error("Purchase error:",e);
 showToast(e.message||"تعذر إنشاء الطلب، حاول لاحقاً");
 }
+}
+  async function loadOrders(){
+  const initData = window.Telegram?.WebApp?.initData || "";
+
+  if(!initData){
+    showToast("افتح المتجر من داخل تيليجرام لعرض طلباتك");
+    renderOrders();
+    return;
+  }
+
+  const el = document.getElementById("ordersContent");
+  el.innerHTML = '<div class="empty">جارٍ تحميل طلباتك...</div>';
+
+  try{
+    const response = await fetch("/api/orders", {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        "Authorization": "tma " + initData
+      }
+    });
+
+    const data = await response.json().catch(()=>({}));
+
+    if(!response.ok){
+      throw new Error(data.error || "تعذر تحميل الطلبات");
+    }
+
+    orders = (Array.isArray(data.orders) ? data.orders : []).map(o => ({
+      id: String(o.order_number || o.id || ""),
+      name: String(o.product_name || "منتج"),
+      date: o.created_at
+        ? new Date(o.created_at).toLocaleDateString("ar-SA")
+        : "",
+      price: Number(o.unit_price || 0),
+      status: o.status === "completed"
+        ? "completed"
+        : (o.status === "awaiting_payment" ? "pending" : o.status)
+    }));
+
+    renderOrders();
+    updateStats();
+  }catch(error){
+    console.error("Load orders failed:", error);
+    el.innerHTML = '<div class="empty"><h3>تعذر تحميل الطلبات</h3><p>تحقق من اتصالك ثم أعد فتح الصفحة.</p><button class="primary" onclick="loadOrders()">إعادة المحاولة</button></div>';
+  }
 }
 function filterOrders(f,el){orderFilter=f;document.querySelectorAll("#orderTabs .tab").forEach(b=>b.classList.remove("active"));el.classList.add("active");renderOrders()}
 function renderOrders(){
