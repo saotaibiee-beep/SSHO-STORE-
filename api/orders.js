@@ -34,7 +34,45 @@ export default async function handler(req, res) {
       error: "Invalid or expired Telegram session"
     });
   }
+if (req.method === "GET") {
+try {
+const baseUrl = supabaseUrl.replace(//+$/, "");
+const query = new URLSearchParams({
+select: "id,order_number,product_name,unit_price,currency,status,created_at",
+telegram_id: "eq.${user.id}",
+order: "created_at.desc",
+limit: "100"
+});
 
+  const response = await fetch(
+    `${baseUrl}/rest/v1/orders?${query.toString()}`,
+    {
+      method: "GET",
+      headers: {
+        "apikey": serviceKey,
+        "Authorization": `Bearer ${serviceKey}`
+      }
+    }
+  );
+
+  const result = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    console.error("Fetch orders failed", response.status);
+    return res.status(502).json({
+      error: "Could not fetch orders"
+    });
+  }
+
+  return res.status(200).json({ orders: result || [] });
+} catch (error) {
+  console.error("Fetch orders request failed", error?.message);
+  return res.status(502).json({
+    error: "Order service temporarily unavailable"
+  });
+}
+
+}
   const { productId, idempotencyKey } = req.body || {};
 
   if (
