@@ -232,6 +232,57 @@ showToast(e.message||"تعذر إنشاء الطلب، حاول لاحقاً");
 }
 function filterOrders(f,el){orderFilter=f;document.querySelectorAll("#orderTabs .tab").forEach(b=>b.classList.remove("active"));el.classList.add("active");renderOrders()}
 function renderOrders(){
+  const labels = {
+    awaiting_payment: "بانتظار الدفع",
+    pending: "بانتظار الدفع",
+    paid: "تم تأكيد الدفع",
+    completed: "مكتمل وتم التسليم",
+    cancelled: "ملغي",
+    refunded: "تم استرداد المبلغ"
+  };
+
+  const list = orders.filter(o => {
+    if (orderFilter === "all") return true;
+    if (orderFilter === "completed") return o.status === "completed";
+    if (orderFilter === "pending") {
+      return ["pending", "awaiting_payment", "paid"].includes(o.status);
+    }
+    return true;
+  });
+
+  const el = document.getElementById("ordersContent");
+
+  if (!list.length) {
+    el.innerHTML = `
+      <div class="empty">
+        <h3>لا توجد طلبات في هذا القسم</h3>
+        <p>ستظهر طلباتك هنا عند توفرها.</p>
+        <button class="primary" onclick="go('store')">تصفح المتجر</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(o => {
+    const status = labels[o.status] || "قيد المراجعة";
+    const currency = o.currency || "USD";
+
+    return `
+      <div class="order-card">
+        <div class="order-card-top">
+          <div>
+            <strong style="font-size:12px">${escapeHtml(o.name)}</strong>
+            <p>رقم الطلب: ${escapeHtml(o.id)}</p>
+            <p>تاريخ الطلب: ${escapeHtml(o.date || "غير متوفر")}</p>
+          </div>
+          <span class="status">${status}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:12px">
+          <span class="subtext">الإجمالي</span>
+          <strong>${money(o.price)} ${escapeHtml(currency)}</strong>
+        </div>
+      </div>`;
+  }).join("");
+}
  const list=orders.filter(o=>orderFilter==="all"||(orderFilter==="completed"&&o.status==="completed")||(orderFilter==="pending"&&o.status==="pending"));
  const el=document.getElementById("ordersContent");
  if(!list.length){el.innerHTML='<div class="empty"><div class="empty-visual"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 3h12l2 5v12a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V8l2-5Z" stroke-linejoin="round"/><path d="M4 8h16M9 12h6M9 16h4" stroke-linecap="round"/></svg></div><h3>رحلتك تبدأ بأول طلب</h3><p>لما تطلب أول منتج، بتلقى تفاصيله وحالة التسليم هنا.</p><button class="primary" onclick="go(\'store\')">تصفح المتجر</button></div>';return}
