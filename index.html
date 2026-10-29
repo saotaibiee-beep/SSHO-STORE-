@@ -480,7 +480,20 @@ function renderBinanceGiftCard(amount,depositId){
  openModal();
 }
 async function submitGiftCardReview(depositId){
- openInfo("طلب بطاقة الهدية قيد المراجعة","رقم طلب الشحن: <b>"+Number(depositId)+"</b><br><br>لم يتم ربط تحقق Binance Gift Card آليًا بعد. احتفظ بإثبات الاسترداد وتواصل مع الدعم لمراجعة الطلب يدويًا. لا ترسل كلمة مرور Binance أو رموز التحقق أو رمز بطاقة غير مستردة.");
+ const input=document.getElementById("giftCardRef");
+ const cardCode=(input?.value||"").trim();
+ if(cardCode.length<8||cardCode.length>120){showToast("أدخل كود بطاقة صحيحاً");input?.focus();return}
+ const initData=window.Telegram?.WebApp?.initData||"";
+ if(!initData){showToast("افتح المتجر من داخل تيليجرام لإرسال الكود");return}
+ const button=document.querySelector("#modalBody button.primary.wide");
+ if(button){button.disabled=true;button.textContent="جارٍ إرسال الطلب…"}
+ try{
+  const response=await fetch(API_BASE+"/api/gift-card-submissions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({depositId:Number(depositId),cardCode})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"تعذر إرسال كود البطاقة");
+  input.value="";
+  openInfo("تم إرسال طلب البطاقة للمراجعة","رقم طلب الشحن: <b>"+Number(data.depositId||depositId)+"</b><br><br>تم حفظ طلبك بنجاح وسيظهر للإدارة ضمن طلبات Binance Gift Card. لا ترسل كلمة مرور Binance أو رموز التحقق.");
+ }catch(error){showToast(error.message||"تعذر إرسال الطلب");if(button){button.disabled=false;button.textContent="تأكيد الشحن"}}
 }
 async function copyDepositAddress(address){
  const value=String(address||document.getElementById("depositAddressText")?.textContent||"").trim();
