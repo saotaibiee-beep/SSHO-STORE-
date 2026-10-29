@@ -334,17 +334,54 @@ async function createDepositRequest(){
 
      openModal();
    }else{
+     const depositAddresses={
+       "USDT BEP20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
+       "USDT TRC20":"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i",
+       "USDT ERC20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
+       "USDT SOL":"HoAS8BFm332G1Y6dv9puEHnfG8pXtRwcD3TXUoEjUaGM"
+     };
+     const address=depositAddresses[selectedMethod];
+     const addressBlock=address
+       ? "<div class='subtext' style='margin-top:16px'>عنوان الاستقبال — "+escapeHtml(selectedMethod)+"</div>"+
+         "<div dir='ltr' style='overflow-wrap:anywhere;text-align:left;background:var(--card,#17121f);padding:12px;border-radius:12px;margin:8px 0;font-weight:700'>"+escapeHtml(address)+"</div>"+
+         "<button class='secondary wide' onclick='copyDepositAddress("+JSON.stringify(address)+")'>نسخ عنوان المحفظة</button>"+
+         "<div class='notice' style='margin-top:12px'>أرسل USDT على الشبكة المحددة فقط. إرسال عملة أو شبكة مختلفة قد يؤدي إلى فقدان الأموال. احتفظ برقم المعاملة لإرساله عند طلب التحقق.</div>"
+       : "<div class='notice' style='margin-top:12px'>هذه الطريقة لا تستخدم عنوان محفظة عامًّا. اتبع تعليمات التحويل أو المراجعة اليدوية التي يقدمها المتجر، ولا ترسل أموالًا قبل تأكيد تفاصيل الدفع.</div>";
      openInfo(
        "تم إنشاء طلب الشحن",
        "رقم الطلب: "+escapeHtml(String(d.depositId||"—"))+
        "<br>المبلغ: "+money(amount)+" USDT"+
        "<br>الطريقة: "+escapeHtml(selectedMethod)+
+       addressBlock+
        "<br><br>الطلب مسجل، لكن الدفع لم يُتحقق منه ولم يُضف أي رصيد."
      );
    }
  }catch(e){
    console.error("Create deposit failed:",e);
    showToast(e.message||"تعذر إنشاء طلب الشحن");
+ }
+}
+
+
+async function copyDepositAddress(address){
+ try{
+   if(navigator.clipboard && window.isSecureContext){
+     await navigator.clipboard.writeText(address);
+   }else{
+     const input=document.createElement("textarea");
+     input.value=address;
+     input.setAttribute("readonly","");
+     input.style.position="fixed";
+     input.style.opacity="0";
+     document.body.appendChild(input);
+     input.select();
+     const ok=document.execCommand("copy");
+     input.remove();
+     if(!ok) throw new Error("copy failed");
+   }
+   showToast("تم نسخ عنوان المحفظة");
+ }catch(e){
+   showToast("تعذر النسخ تلقائيًا؛ اضغط مطولًا على العنوان لنسخه");
  }
 }
 
