@@ -44,6 +44,8 @@ button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:tran
 .deposit-copy{touch-action:manipulation}
 .deposit-address-text{user-select:text;-webkit-user-select:text;overflow-wrap:anywhere}
 .giftcard-instructions{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:rgba(255,255,255,.025);line-height:1.9}
+
+.giftcard-page{display:flex;flex-direction:column;gap:16px;text-align:right;direction:rtl}.giftcard-page .giftcard-instructions,.giftcard-notes,.giftcard-code-card{border:1px solid var(--line,#2a3140);border-radius:20px;padding:18px;background:rgba(255,255,255,.025);line-height:1.9}.giftcard-page .giftcard-instructions h3,.giftcard-notes h3{font-size:19px;margin:0 0 14px}.gift-step{display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:start;margin:14px 0}.gift-step>span{font-size:24px}.gift-step p{margin:0;font-size:15px;line-height:1.9}.giftcard-code-card label{display:block;margin-bottom:10px}.giftcard-amount{padding:4px 8px;text-align:right;color:var(--muted,#9ca3af)}.giftcard-notes ul{padding-right:22px;margin:0}.giftcard-notes li{margin:7px 0}
 </style>
 </head>
 <body>
@@ -415,13 +417,21 @@ async function createDepositRequest(){
 
 
 function renderBinanceGiftCard(amount,depositId){
- document.getElementById("modalTitle").textContent="الشحن ببطاقة Binance Gift Card";
+ document.getElementById("modalTitle").textContent="شحن الرصيد ببطاقة Binance Gift Card";
  document.getElementById("modalBody").innerHTML=
- '<div class="deposit-modal-content">'+
- '<div class="deposit-summary"><div class="deposit-summary-item"><div class="deposit-token">🎁 Binance Gift Card</div></div><div class="deposit-summary-item"><div class="deposit-summary-label">المبلغ المطلوب</div><div class="deposit-summary-value" dir="ltr">'+money(amount)+' USDT</div></div></div>'+
- '<div class="giftcard-instructions"><h3>تعليمات استخدام بطاقة الهدايا</h3><ol><li>افتح تطبيق أو موقع Binance الرسمي وسجّل الدخول إلى حسابك بنفسك.</li><li>افتح قسم Gift Card واختر استرداد/إضافة بطاقة، ثم أدخل رمز البطاقة في صفحة Binance الرسمية فقط.</li><li>تأكد من أن البطاقة صالحة وأن قيمتها وعملتها توافقان طلب الشحن.</li><li>بعد الاسترداد، أرسل رقم الطلب وإثبات الاسترداد للدعم للمراجعة اليدوية.</li></ol><p><b>تنبيه أمني:</b> لا تشارك كلمة المرور أو رموز 2FA أو مفاتيح الحساب. لا تُدخل رمز البطاقة في هذه الصفحة ولا ترسله إلى جهة غير موثوقة.</p><p>هذه الصفحة لا تتحقق آليًا من بطاقات Binance؛ لن تتم إضافة الرصيد إلا بعد التحقق اليدوي من الاسترداد.</p></div>'+
- '<div class="deposit-verify"><label for="giftCardRef">مرجع الاسترداد أو ملاحظة (اختياري)</label><input id="giftCardRef" class="field" maxlength="120" placeholder="مرجع الاسترداد فقط، دون كلمة مرور أو رموز دخول"></div>'+
- '<button class="primary wide" onclick="submitGiftCardReview('+depositId+')">إرسال الطلب للمراجعة</button><button class="secondary wide" onclick="closeModal()">إغلاق</button></div>';
+ '<div class="deposit-modal-content giftcard-page">'+
+ '<div class="giftcard-instructions">'+
+ '<h3>✍️ شحن الرصيد بخطوات بسيطة</h3>'+
+ '<div class="gift-step"><span>💳</span><p><b>احصل على البطاقة:</b> قم بشراء بطاقة هدايا باينانس (Binance Gift Card) بالقيمة المطلوبة من منصة أو موقع موثوق.</p></div>'+
+ '<div class="gift-step"><span>📋</span><p><b>انسخ الكود:</b> احصل على رمز الاسترداد الخاص بالبطاقة (عادةً يتكون من 16 من الحروف والأرقام).</p></div>'+
+ '<div class="gift-step"><span>🗂️</span><p><b>استرد البطاقة في Binance:</b> افتح تطبيق أو موقع Binance الرسمي، ثم قسم Gift Card، وأدخل رمز البطاقة هناك فقط. لا تدخل الرمز في المتجر.</p></div>'+
+ '<div class="gift-step"><span>🕒</span><p><b>انتظار المراجعة:</b> بعد الاسترداد، احتفظ بإثبات العملية وتواصل مع الدعم عبر الدردشة المباشرة لإرسال رقم طلب الشحن. تتم مراجعة الطلب يدويًا.</p></div>'+
+ '</div>'+
+ '<div class="giftcard-code-card"><label for="giftCardRef">مرجع الاسترداد أو ملاحظة (اختياري)</label><input id="giftCardRef" class="field" maxlength="120" placeholder="لا تضع رمز البطاقة هنا"></div>'+
+ '<button class="primary wide" onclick="submitGiftCardReview('+Number(depositId)+')">تأكيد الشحن</button>'+
+ '<div class="giftcard-amount">المتاح للشحنة الجديدة الآن: <b>'+money(amount)+' USDT</b></div>'+
+ '<div class="giftcard-notes"><h3>⚠️ ملاحظات هامة:</h3><ul><li>تأكد من صحة البطاقة واستردادها بنجاح قبل التواصل مع الدعم لتجنب تأخير الطلب.</li><li>في حال واجهتك أي مشكلة، تواصل مع خدمة العملاء عبر الدردشة المباشرة.</li><li>لا تشارك كلمة مرور Binance أو رموز التحقق (2FA)، ولا ترسل رمز بطاقة غير مستردة.</li></ul></div>'+
+ '</div>';
  openModal();
 }
 async function submitGiftCardReview(depositId){
