@@ -348,6 +348,7 @@ async function createDepositRequest(){
      throw new Error(d.error||"تعذر إنشاء طلب الشحن");
    }
 
+   window.currentDepositAmount=amount;window.currentDepositId=Number(d.depositId);
    const depositAddresses={
      "USDT BEP20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
      "USDT TRC20":"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i",
@@ -467,25 +468,29 @@ async function copyDepositAddress(address){
  }
 }
 
-function switchDepositNetwork(method){
- const addresses={
-  "USDT BEP20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
-  "USDT TRC20":"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i",
-  "USDT ERC20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
-  "USDT SOL":"HoAS8BFm332G1Y6dv9puEHnfG8pXtRwcD3TXUoEjUaGM"
- };
+async function switchDepositNetwork(method){
+ const addresses={"USDT BEP20":"0x58a0486de1f5f812c574a9b19b6cda426486d837","USDT TRC20":"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i","USDT ERC20":"0x58a0486de1f5f812c574a9b19b6cda426486d837","USDT SOL":"HoAS8BFm332G1Y6dv9puEHnfG8pXtRwcD3TXUoEjUaGM"};
  const names={"USDT BEP20":"BEP20","USDT TRC20":"TRC20","USDT ERC20":"ERC20","USDT SOL":"SOL"};
- const address=addresses[method];if(!address)return;
- selectedMethod=method;
- document.querySelectorAll("#modalBody .deposit-network").forEach((el)=>{const active=el.textContent.trim().startsWith(names[method]);el.classList.toggle("active",active);el.setAttribute("aria-pressed",String(active))});
- const addressEl=document.getElementById("depositAddressText");if(addressEl)addressEl.textContent=address;
- const networkEl=document.querySelector("#modalBody .deposit-summary-item:nth-child(3) .deposit-summary-value");if(networkEl)networkEl.textContent=names[method];
- const warning=document.querySelector("#modalBody .deposit-warning");if(warning)warning.innerHTML='تأكد من استخدام شبكة <b>'+escapeHtml(names[method])+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.';
- const qr=document.getElementById("depositQr");if(qr){qr.innerHTML="";if(window.QRCode){new QRCode(qr,{text:address,width:170,height:170,colorDark:"#09070e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}else{qr.innerHTML='<div style="color:#211831;font-size:12px;padding:8px">تعذر تحميل QR؛ انسخ العنوان يدويًا.</div>'}}
- const copy=document.querySelector("#modalBody .deposit-copy");if(copy)copy.setAttribute("onclick","copyDepositAddress("+JSON.stringify(address)+")");
- const verify=document.querySelector("#modalBody .deposit-verify");
- if(verify && method!=="USDT BEP20")verify.innerHTML='<div class="subtext">التحقق الآلي لهذه الشبكة غير متاح حتى الآن؛ لا ترسل طلب تحقق على أنه ناجح. احتفظ برقم المعاملة لمراجعته يدويًا.</div>';
- else if(!verify && method==="USDT BEP20") showToast("لإظهار حقل تحقق BEP20 أنشئ طلب شحن BEP20 جديدًا");
+ const address=addresses[method];if(!address||method===selectedMethod)return;
+ const initData=window.Telegram?.WebApp?.initData||"";if(!initData){showToast("افتح المتجر من داخل تيليجرام");return}
+ const buttons=document.querySelectorAll("#modalBody .deposit-network");buttons.forEach(b=>b.disabled=true);
+ try{
+  const response=await fetch(API_BASE+"/api/deposits",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({amount:Number(window.currentDepositAmount),method})});
+  const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||"تعذر إنشاء طلب للشبكة المختارة");
+  selectedMethod=method;window.currentDepositId=Number(data.depositId);
+  buttons.forEach(el=>{const active=el.textContent.trim().startsWith(names[method]);el.classList.toggle("active",active);el.setAttribute("aria-pressed",String(active));el.disabled=false});
+  const addressEl=document.getElementById("depositAddressText");if(addressEl)addressEl.textContent=address;
+  const networkEl=document.querySelector("#modalBody .deposit-summary-item:nth-child(3) .deposit-summary-value");if(networkEl)networkEl.textContent=names[method];
+  const warning=document.querySelector("#modalBody .deposit-warning");if(warning)warning.innerHTML='تأكد من استخدام شبكة <b>'+escapeHtml(names[method])+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.';
+  const qr=document.getElementById("depositQr");if(qr){qr.innerHTML="";if(window.QRCode)new QRCode(qr,{text:address,width:170,height:170,colorDark:"#09070e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});else qr.textContent="تعذر تحميل QR"}
+  const copy=document.querySelector("#modalBody .deposit-copy");if(copy)copy.setAttribute("onclick","copyDepositAddress("+JSON.stringify(address)+")");
+  let verify=document.querySelector("#modalBody .deposit-verify");
+  if(method==="USDT BEP20"){
+   const html='<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+window.currentDepositId+')">تحقق من المعاملة</button></div>';
+   if(verify)verify.outerHTML=html;else if(warning)warning.insertAdjacentHTML("afterend",html);
+  }else if(verify)verify.innerHTML='<div class="subtext">التحقق الآلي لهذه الشبكة غير مفعّل بعد؛ لا تعتبر الطلب مؤكداً حتى يراجعه الدعم.</div>';
+  showToast("تم تغيير الشبكة وإنشاء طلب جديد");
+ }catch(e){buttons.forEach(b=>b.disabled=false);showToast(e.message||"تعذر تغيير الشبكة")}
 }
 async function verifyBep20Deposit(depositId){
  const input=document.getElementById("bep20TxHash");
