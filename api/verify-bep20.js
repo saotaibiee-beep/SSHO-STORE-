@@ -164,7 +164,6 @@ export default async function handler(req, res) {
 
   return data.result;
 }
-    }
 
     const receipt = await chainApi({
       module: "proxy",
