@@ -15,7 +15,7 @@ error: "Supabase environment variables are not configured"
 
 try {
 const response = await fetch(
-`${supabaseUrl}/rest/v1/products?select=*`,
+`${supabaseUrl.replace(/\\/+$/, "")}/rest/v1/products?select=id,slug,name,description,image_url,price,currency,category,available,active,stock_count&active=eq.true&available=eq.true`,
 {
 headers: {
 apikey: supabaseKey,
