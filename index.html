@@ -38,6 +38,12 @@ button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:tran
 .deposit-verify label{display:block;font-size:11px;color:#aaa0c5;margin-bottom:7px}
 @media(max-width:360px){.deposit-summary{grid-template-columns:1fr 1fr}.deposit-token{grid-column:1/-1}.deposit-networks{gap:4px}.deposit-network{font-size:11px}.deposit-network small{font-size:8px}.deposit-qr-frame{width:170px;height:170px}}
 .notice{border:1px solid #a66aff2b;background:#21182d;color:#cdb8e7;border-radius:13px;padding:12px;font-size:11px;line-height:1.8;margin:12px 0}.toast{position:fixed;z-index:70;bottom:95px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#292036;border:1px solid #b789ff40;color:#f4eaff;padding:12px 16px;border-radius:13px;font-size:12px;box-shadow:0 8px 28px #0008;transition:.22s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}.admin-badge{display:none;background:#322044;border:1px solid #a66aff40;border-radius:10px;padding:8px 10px;color:#d9bcff;font-size:10px;margin:12px 0}.admin-badge.show{display:block}.order-card{padding:14px;border-radius:15px;border:1px solid var(--line);background:#15121f;margin-bottom:9px}.order-card-top{display:flex;justify-content:space-between;gap:10px}.status{font-size:9px;border-radius:7px;padding:5px 7px;background:#30213e;color:#d7baff;white-space:nowrap}.order-card p{font-size:10px;color:#9d92ab;margin:7px 0 0}.hide-balance .balance-value{filter:blur(7px);user-select:none}@keyframes slide{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}@media(min-width:520px){.bottom-nav{left:50%;right:auto;width:520px;transform:translateX(-50%);border-left:1px solid #ffffff0c;border-right:1px solid #ffffff0c;border-radius:20px 20px 0 0}.modal-backdrop{align-items:center}.modal{border-radius:24px;margin:16px}}
+
+.deposit-network{cursor:pointer;user-select:none;touch-action:manipulation}
+.deposit-network:focus-visible,.deposit-copy:focus-visible{outline:2px solid #8bb8ff;outline-offset:3px}
+.deposit-copy{touch-action:manipulation}
+.deposit-address-text{user-select:text;-webkit-user-select:text;overflow-wrap:anywhere}
+.giftcard-instructions{border:1px solid var(--line);border-radius:14px;padding:14px;margin:14px 0;background:rgba(255,255,255,.025);line-height:1.9}
 </style>
 </head>
 <body>
@@ -356,6 +362,15 @@ async function createDepositRequest(){
    };
    const address=depositAddresses[selectedMethod];
    const network=networkInfo[selectedMethod];
+   if(selectedMethod==="Binance Gift Card"){
+     renderBinanceGiftCard(amount,Number(d.depositId));
+     return;
+   }
+   if(selectedMethod==="Binance ID"){
+     document.getElementById("modalTitle").textContent="شحن عبر Binance ID";
+     document.getElementById("modalBody").innerHTML='<div class="giftcard-instructions"><h3>تحويل عبر Binance ID</h3><p>أدخل معرّف Binance الخاص بالمستلم في صفحة الدعم أو اتبع بيانات التحويل التي يزوّدك بها الدعم قبل الدفع. لا ترسل كلمة المرور أو رمز التحقق.</p><p><b>المبلغ:</b> '+money(amount)+' USDT</p><p>لا يتم تأكيد الشحن تلقائيًا من هذه الصفحة؛ يحتاج التحويل إلى مراجعة.</p></div><button class="secondary wide" onclick="closeModal()">إغلاق</button>';
+     openModal();return;
+   }
    if(!address||!network) throw new Error("عنوان هذه الشبكة غير مضبوط");
    document.getElementById("modalTitle").textContent="تفاصيل شحن USDT";
    document.getElementById("modalBody").innerHTML=
@@ -365,11 +380,11 @@ async function createDepositRequest(){
          '<div class="deposit-summary-item"><div class="deposit-summary-label">المبلغ</div><div class="deposit-summary-value" dir="ltr">'+money(amount)+' USDT</div></div>'+
          '<div class="deposit-summary-item"><div class="deposit-summary-label">الشبكة</div><div class="deposit-summary-value">'+escapeHtml(network.short)+'</div></div>'+
        '</div>'+
-       '<div class="deposit-networks">'+
-         '<div class="deposit-network '+(selectedMethod==="USDT BEP20"?"active":"")+'">BEP20<small>BNB Chain</small></div>'+
-         '<div class="deposit-network '+(selectedMethod==="USDT TRC20"?"active":"")+'">TRC20<small>TRON</small></div>'+
-         '<div class="deposit-network '+(selectedMethod==="USDT ERC20"?"active":"")+'">ERC20<small>Ethereum</small></div>'+
-         '<div class="deposit-network '+(selectedMethod==="USDT SOL"?"active":"")+'">SOL<small>Solana</small></div>'+
+       '<div class="deposit-networks" aria-label="اختر الشبكة">'+
+         '<button type="button" class="deposit-network '+(selectedMethod==="USDT BEP20"?"active":"")+'" onclick="switchDepositNetwork(\'USDT BEP20\')" aria-pressed="'+(selectedMethod==="USDT BEP20")+'">BEP20<small>BNB Chain</small></button>'+
+         '<button type="button" class="deposit-network '+(selectedMethod==="USDT TRC20"?"active":"")+'" onclick="switchDepositNetwork(\'USDT TRC20\')" aria-pressed="'+(selectedMethod==="USDT TRC20")+'">TRC20<small>TRON</small></button>'+
+         '<button type="button" class="deposit-network '+(selectedMethod==="USDT ERC20"?"active":"")+'" onclick="switchDepositNetwork(\'USDT ERC20\')" aria-pressed="'+(selectedMethod==="USDT ERC20")+'">ERC20<small>Ethereum</small></button>'+
+         '<button type="button" class="deposit-network '+(selectedMethod==="USDT SOL"?"active":"")+'" onclick="switchDepositNetwork(\'USDT SOL\')" aria-pressed="'+(selectedMethod==="USDT SOL")+'">SOL<small>Solana</small></button>'+
        '</div>'+
        '<div class="deposit-qr-card">'+
          '<div class="deposit-qr-title">امسح رمز QR للتحويل</div>'+
@@ -397,28 +412,81 @@ async function createDepositRequest(){
 }
 
 
+
+function renderBinanceGiftCard(amount,depositId){
+ document.getElementById("modalTitle").textContent="الشحن ببطاقة Binance Gift Card";
+ document.getElementById("modalBody").innerHTML=
+ '<div class="deposit-modal-content">'+
+ '<div class="deposit-summary"><div class="deposit-summary-item"><div class="deposit-token">🎁 Binance Gift Card</div></div><div class="deposit-summary-item"><div class="deposit-summary-label">المبلغ المطلوب</div><div class="deposit-summary-value" dir="ltr">'+money(amount)+' USDT</div></div></div>'+
+ '<div class="giftcard-instructions"><h3>تعليمات استخدام بطاقة الهدايا</h3><ol><li>افتح تطبيق أو موقع Binance الرسمي وسجّل الدخول إلى حسابك بنفسك.</li><li>افتح قسم Gift Card واختر استرداد/إضافة بطاقة، ثم أدخل رمز البطاقة في صفحة Binance الرسمية فقط.</li><li>تأكد من أن البطاقة صالحة وأن قيمتها وعملتها توافقان طلب الشحن.</li><li>بعد الاسترداد، أرسل رقم الطلب وإثبات الاسترداد للدعم للمراجعة اليدوية.</li></ol><p><b>تنبيه أمني:</b> لا تشارك كلمة المرور أو رموز 2FA أو مفاتيح الحساب. لا تُدخل رمز البطاقة في هذه الصفحة ولا ترسله إلى جهة غير موثوقة.</p><p>هذه الصفحة لا تتحقق آليًا من بطاقات Binance؛ لن تتم إضافة الرصيد إلا بعد التحقق اليدوي من الاسترداد.</p></div>'+
+ '<div class="deposit-verify"><label for="giftCardRef">مرجع الاسترداد أو ملاحظة (اختياري)</label><input id="giftCardRef" class="field" maxlength="120" placeholder="مرجع الاسترداد فقط، دون كلمة مرور أو رموز دخول"></div>'+
+ '<button class="primary wide" onclick="submitGiftCardReview('+depositId+')">إرسال الطلب للمراجعة</button><button class="secondary wide" onclick="closeModal()">إغلاق</button></div>';
+ openModal();
+}
+async function submitGiftCardReview(depositId){
+ const ref=(document.getElementById("giftCardRef")?.value||"").trim();
+ const initData=window.Telegram?.WebApp?.initData||"";
+ if(!initData){showToast("افتح المتجر من داخل تيليجرام");return}
+ const button=document.querySelector("#modalBody button.primary");if(button){button.disabled=true;button.textContent="جارٍ الإرسال..."}
+ try{
+  const r=await fetch(API_BASE+"/api/deposits/gift-card-reference",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({depositId,reference:ref})});
+  const d=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(d.error||"مسار إرسال المرجع غير مفعّل على الخادم");
+  openInfo("تم إرسال الطلب للمراجعة","تم إرسال مرجع الاسترداد. لا تتم إضافة الرصيد تلقائيًا؛ انتظر مراجعة الدعم.");
+ }catch(e){showToast(e.message||"تعذر إرسال الطلب");if(button){button.disabled=false;button.textContent="إرسال الطلب للمراجعة"}}
+}
+
 async function copyDepositAddress(address){
+ const value=String(address||document.getElementById("depositAddressText")?.textContent||"").trim();
+ if(!value){showToast("لا يوجد عنوان لنسخه");return}
+ let copied=false;
  try{
    if(navigator.clipboard && window.isSecureContext){
-     await navigator.clipboard.writeText(address);
-   }else{
-     const input=document.createElement("textarea");
-     input.value=address;
-     input.setAttribute("readonly","");
-     input.style.position="fixed";
-     input.style.opacity="0";
-     document.body.appendChild(input);
-     input.select();
-     const ok=document.execCommand("copy");
-     input.remove();
-     if(!ok) throw new Error("copy failed");
+     await navigator.clipboard.writeText(value);copied=true;
    }
+ }catch(e){}
+ if(!copied){
+   let input;
+   try{
+     input=document.createElement("textarea");
+     input.value=value;input.setAttribute("readonly","");
+     input.style.position="fixed";input.style.left="-9999px";input.style.top="0";
+     input.style.fontSize="16px";document.body.appendChild(input);
+     input.focus();input.select();input.setSelectionRange(0,input.value.length);
+     copied=!!document.execCommand("copy");
+   }catch(e){copied=false}
+   finally{if(input?.parentNode)input.parentNode.removeChild(input)}
+ }
+ if(copied){
    showToast("تم نسخ عنوان المحفظة");
- }catch(e){
-   showToast("تعذر النسخ تلقائيًا؛ اضغط مطولًا على العنوان لنسخه");
+   try{window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success")}catch(e){}
+ }else{
+   const el=document.getElementById("depositAddressText");
+   if(el){const range=document.createRange();range.selectNodeContents(el);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range)}
+   showToast("تعذر النسخ التلقائي. تم تحديد العنوان؛ اضغط مطولًا ثم نسخ");
  }
 }
 
+function switchDepositNetwork(method){
+ const addresses={
+  "USDT BEP20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
+  "USDT TRC20":"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i",
+  "USDT ERC20":"0x58a0486de1f5f812c574a9b19b6cda426486d837",
+  "USDT SOL":"HoAS8BFm332G1Y6dv9puEHnfG8pXtRwcD3TXUoEjUaGM"
+ };
+ const names={"USDT BEP20":"BEP20","USDT TRC20":"TRC20","USDT ERC20":"ERC20","USDT SOL":"SOL"};
+ const address=addresses[method];if(!address)return;
+ selectedMethod=method;
+ document.querySelectorAll("#modalBody .deposit-network").forEach((el)=>{const active=el.textContent.trim().startsWith(names[method]);el.classList.toggle("active",active);el.setAttribute("aria-pressed",String(active))});
+ const addressEl=document.getElementById("depositAddressText");if(addressEl)addressEl.textContent=address;
+ const networkEl=document.querySelector("#modalBody .deposit-summary-item:nth-child(3) .deposit-summary-value");if(networkEl)networkEl.textContent=names[method];
+ const warning=document.querySelector("#modalBody .deposit-warning");if(warning)warning.innerHTML='تأكد من استخدام شبكة <b>'+escapeHtml(names[method])+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.';
+ const qr=document.getElementById("depositQr");if(qr){qr.innerHTML="";if(window.QRCode){new QRCode(qr,{text:address,width:170,height:170,colorDark:"#09070e",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M})}else{qr.innerHTML='<div style="color:#211831;font-size:12px;padding:8px">تعذر تحميل QR؛ انسخ العنوان يدويًا.</div>'}}
+ const copy=document.querySelector("#modalBody .deposit-copy");if(copy)copy.setAttribute("onclick","copyDepositAddress("+JSON.stringify(address)+")");
+ const verify=document.querySelector("#modalBody .deposit-verify");
+ if(verify && method!=="USDT BEP20")verify.innerHTML='<div class="subtext">التحقق الآلي لهذه الشبكة غير متاح حتى الآن؛ لا ترسل طلب تحقق على أنه ناجح. احتفظ برقم المعاملة لمراجعته يدويًا.</div>';
+ else if(!verify && method==="USDT BEP20") showToast("لإظهار حقل تحقق BEP20 أنشئ طلب شحن BEP20 جديدًا");
+}
 async function verifyBep20Deposit(depositId){
  const input=document.getElementById("bep20TxHash");
  const txHash=(input?.value||"").trim();
