@@ -169,9 +169,11 @@ svg{flex-shrink:0}
     <button class="setting setting-link" onclick="openInfo('الشروط والتعهد والخصوصية','يجب نشر الشروط والتعهد وسياسة الخصوصية النهائية قبل استقبال المدفوعات الحقيقية.')"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>الشروط والتعهد والخصوصية</strong><small>السياسات والحقوق</small></span><span class="chev">‹</span></button>
     <button class="setting setting-link" onclick="contactSupport()"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>التواصل مع الدعم</strong><small>نحن هنا لمساعدتك</small></span><span class="chev">‹</span></button>
   </div>
-  <a class="setting setting-link" href="/admin.html" style="display:flex;text-decoration:none;align-items:center;gap:12px;margin-top:12px"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>لوحة الإدارة</strong><small>مراجعة طلبات Binance Gift Card — للمصرّح لهم فقط</small></span><span class="chev">‹</span></a>
-  <div id="adminStatus" class="admin-badge">وضع الإدارة: صلاحيات الإدارة تُتحقق على الخادم.</div>
-  <div class="notice">لوحة الإدارة محمية على الخادم؛ لن يتم عرض الطلبات أو أكواد البطاقات إلا لحساب إداري معتمد.</div>
+  <div id="adminTools" style="display:none">
+    <a class="setting setting-link" href="/admin.html" style="display:flex;text-decoration:none;align-items:center;gap:12px;margin-top:12px"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>لوحة الإدارة</strong><small>مراجعة طلبات Binance Gift Card — للمصرّح لهم فقط</small></span><span class="chev">‹</span></a>
+    <div id="adminStatus" class="admin-badge show">تم التحقق من صلاحيات الإدارة.</div>
+    <div class="notice">لوحة الإدارة محمية على الخادم؛ لن يتم عرض الطلبات أو أكواد البطاقات إلا لحساب إداري معتمد.</div>
+  </div>
 </section>
 </main>
 </div>
@@ -633,6 +635,11 @@ function contactSupport(){
 }
 function showToast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
 function updateStats(){document.getElementById("ordersCount").textContent=orders.length;document.getElementById("purchasesCount").textContent=orders.filter(o=>o.status==="completed").length}
+async function checkAdminAccess(){
+ const tg=window.Telegram?.WebApp;const initData=tg?.initData||"";if(!initData)return;
+ try{const r=await fetch("/api/admin/gift-card-submissions?status=pending_review",{headers:{Authorization:"tma "+initData},cache:"no-store"});if(r.ok){document.getElementById("adminTools").style.display="block";}}
+ catch(e){console.warn("Admin access check failed");}
+}
 function applyTelegramUser(){
  const tg=window.Telegram?.WebApp;if(!tg)return;
  try{tg.ready();tg.expand();tg.setHeaderColor("#0b0912");tg.setBackgroundColor("#0b0912");const u=tg.initDataUnsafe?.user;if(u){document.getElementById("userName").textContent=[u.first_name,u.last_name].filter(Boolean).join(" ")||"مستخدم تيليجرام";document.getElementById("userId").textContent="معرّف تيليجرام: "+u.id;document.getElementById("avatar").textContent=(u.first_name||"S").charAt(0).toUpperCase();if(window.SSHO_ADMIN_TELEGRAM_ID&&String(u.id)===String(window.SSHO_ADMIN_TELEGRAM_ID))document.getElementById("adminStatus").classList.add("show")}}
@@ -662,6 +669,7 @@ async function loadProducts(){
 loadProducts();
 renderOrders();
 applyTelegramUser();
+checkAdminAccess();
 </script>
 </body>
 </html>
