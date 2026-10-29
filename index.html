@@ -97,7 +97,6 @@ li,summary,details,table,th,td,nav,header,footer,section,article {
   <div class="wallet-card">
     <div style="display:flex;align-items:center;justify-content:space-between"><span style="font-size:12px;color:#c7b3e3">الرصيد المتاح</span><span style="border:1px solid #b38aff3b;border-radius:9px;padding:6px 8px;font-size:9px;color:#d7baff">USDT Wallet</span></div>
     <div class="wallet-number balance-value">0.00 <span style="font-size:13px;letter-spacing:0;color:#c9b4e6">USDT</span></div>
-    <div style="font-size:10px;color:#a79ab9">الرصيد المعروض تجريبي إلى حين الربط بالخادم.</div>
     <div class="wallet-actions"><button class="primary" onclick="document.getElementById('depositSection').scrollIntoView({behavior:'smooth'})">＋ شحن الرصيد</button><button class="secondary" onclick="showToast('سيظهر سجل الحركات بعد ربط الحساب')">سجل الحركات</button></div>
   </div>
   <div class="section-head" id="depositSection"><h2>اختر طريقة الشحن</h2></div>
@@ -113,7 +112,6 @@ li,summary,details,table,th,td,nav,header,footer,section,article {
   <div class="amounts"><button class="amount active" onclick="chooseAmount(1,this)">$1</button><button class="amount" onclick="chooseAmount(5,this)">$5</button><button class="amount" onclick="chooseAmount(10,this)">$10</button><button class="amount" onclick="chooseAmount(25,this)">$25</button></div>
   <label class="subtext" style="display:block;margin-top:15px">أو أدخل المبلغ يدوياً (USDT)</label><input class="field" id="customAmount" type="number" min="1" max="10000" step="0.01" placeholder="مثال: 12.50" oninput="clearQuickAmount()">
   <button class="primary wide" onclick="createDepositRequest()">إنشاء طلب بالمبلغ الدقيق</button>
-  <div class="notice">إنشاء الطلب هنا تجريبي فقط. يلزم ربط مزود الدفع والتحقق من الإيداع على الخادم قبل إضافة الرصيد.</div>
 </section>
 
 <section class="page" id="page-account">
