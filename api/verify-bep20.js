@@ -123,22 +123,47 @@ export default async function handler(req, res) {
     }
 
     async function chainApi(params) {
-      const url = new URL("https://api.etherscan.io/v2/api");
-      url.searchParams.set("chainid", "56");
-      url.searchParams.set("apikey", apiKey);
+  const url = new URL("https://api.etherscan.io/v2/api");
+  url.searchParams.set("chainid", "56");
+  url.searchParams.set("apikey", apiKey);
 
-      for (const [key, value] of Object.entries(params)) {
-        url.searchParams.set(key, value);
-      }
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(key, value);
+  }
 
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Blockchain API unavailable");
+  const response = await fetch(url);
 
-      const data = await response.json();
-      if (data.result === undefined || data.result === null) {
-        throw new Error("Blockchain API returned no result");
-      }
-      return data.result;
+  if (!response.ok) {
+    throw new Error(`Blockchain API HTTP error: ${response.status}`);
+  }
+
+  let data;
+
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Blockchain API returned invalid JSON");
+  }
+
+  if (data.error) {
+    throw new Error(
+      `Blockchain RPC error: ${String(data.error.message || "Unknown error")}`
+    );
+  }
+
+  if (data.result === undefined || data.result === null) {
+    throw new Error("Blockchain API returned no result");
+  }
+
+  if (
+    typeof data.result === "string" &&
+    /^(NOTOK|ERROR|INVALID API KEY)/i.test(data.result.trim())
+  ) {
+    throw new Error("Blockchain API returned an error result");
+  }
+
+  return data.result;
+}
     }
 
     const receipt = await chainApi({
