@@ -533,7 +533,7 @@ async function switchDepositNetwork(method){
   if(method==="USDT BEP20"){
    const html='<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+window.currentDepositId+')">تحقق من المعاملة</button></div>';
    if(verify)verify.outerHTML=html;else if(warning)warning.insertAdjacentHTML("afterend",html);
-  }else if(verify)verify.innerHTML='<div class="subtext">التحقق الآلي لهذه الشبكة غير مفعّل بعد؛ لا تعتبر الطلب مؤكداً حتى يراجعه الدعم.</div>';
+  }else if(verify)verify.innerHTML="";
   showToast("تم تغيير الشبكة وإنشاء طلب جديد");
  }catch(e){buttons.forEach(b=>b.disabled=false);showToast(e.message||"تعذر تغيير الشبكة")}
 }
