@@ -15,11 +15,11 @@ error: "Supabase environment variables are not configured"
 
 try {
 const response = await fetch(
-"${supabaseUrl}/rest/v1/products?select=*",
+`${supabaseUrl}/rest/v1/products?select=*`,
 {
 headers: {
 apikey: supabaseKey,
-Authorization: "Bearer ${supabaseKey}"
+Authorization: `Bearer ${supabaseKey}`
 }
 }
 );
