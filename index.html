@@ -427,7 +427,7 @@ function renderBinanceGiftCard(amount,depositId){
  '<div class="gift-step"><span>🛍️</span><p><b>أدخل كود البطاقة هنا:</b> الصق رمز بطاقة Binance Gift Card في الحقل المخصص أدناه داخل المتجر، ثم اضغط على زر "تأكيد الشحن" لإرسال الطلب للمراجعة.</p></div>'+
  '<div class="gift-step"><span>🕒</span><p><b>انتظار المراجعة:</b> بعد الاسترداد، احتفظ بإثبات العملية وتواصل مع الدعم عبر الدردشة المباشرة لإرسال رقم طلب الشحن. تتم مراجعة الطلب يدويًا.</p></div>'+
  '</div>'+
- '<div class="giftcard-code-card"><label for="giftCardRef">مرجع الاسترداد أو ملاحظة (اختياري)</label><input id="giftCardRef" class="field" maxlength="120" placeholder="الصق كود البطاقة هنا"></div>'+
+ '<div class="giftcard-code-card"><label for="giftCardRef">كود بطاقة Binance Gift Card</label><input id="giftCardRef" class="field" maxlength="120" autocomplete="off" placeholder="أدخل كود البطاقة هنا"></div>'+
  '<button class="primary wide" onclick="submitGiftCardReview('+Number(depositId)+')">تأكيد الشحن</button>'+
  '<div class="giftcard-amount">المتاح للشحنة الجديدة الآن: <b>'+money(amount)+' USDT</b></div>'+
  '<div class="giftcard-notes"><h3>⚠️ ملاحظات هامة:</h3><ul><li>تأكد من صحة البطاقة واستردادها بنجاح قبل التواصل مع الدعم لتجنب تأخير الطلب.</li><li>في حال واجهتك أي مشكلة، تواصل مع خدمة العملاء عبر الدردشة المباشرة.</li><li>لا تشارك كلمة مرور Binance أو رموز التحقق (2FA)، وأدخل رمز البطاقة في الحقل المخصص بالمتجر فقط، ولا تشارك كلمة مرور Binance أو رموز التحقق.</li></ul></div>'+
