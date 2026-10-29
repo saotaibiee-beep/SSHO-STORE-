@@ -425,18 +425,8 @@ function renderBinanceGiftCard(amount,depositId){
  openModal();
 }
 async function submitGiftCardReview(depositId){
- const ref=(document.getElementById("giftCardRef")?.value||"").trim();
- const initData=window.Telegram?.WebApp?.initData||"";
- if(!initData){showToast("افتح المتجر من داخل تيليجرام");return}
- const button=document.querySelector("#modalBody button.primary");if(button){button.disabled=true;button.textContent="جارٍ الإرسال..."}
- try{
-  const r=await fetch(API_BASE+"/api/deposits/gift-card-reference",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({depositId,reference:ref})});
-  const d=await r.json().catch(()=>({}));
-  if(!r.ok)throw new Error(d.error||"مسار إرسال المرجع غير مفعّل على الخادم");
-  openInfo("تم إرسال الطلب للمراجعة","تم إرسال مرجع الاسترداد. لا تتم إضافة الرصيد تلقائيًا؛ انتظر مراجعة الدعم.");
- }catch(e){showToast(e.message||"تعذر إرسال الطلب");if(button){button.disabled=false;button.textContent="إرسال الطلب للمراجعة"}}
+ openInfo("طلب بطاقة الهدية قيد المراجعة","رقم طلب الشحن: <b>"+Number(depositId)+"</b><br><br>لم يتم ربط تحقق Binance Gift Card آليًا بعد. احتفظ بإثبات الاسترداد وتواصل مع الدعم لمراجعة الطلب يدويًا. لا ترسل كلمة مرور Binance أو رموز التحقق أو رمز بطاقة غير مستردة.");
 }
-
 async function copyDepositAddress(address){
  const value=String(address||document.getElementById("depositAddressText")?.textContent||"").trim();
  if(!value){showToast("لا يوجد عنوان لنسخه");return}
