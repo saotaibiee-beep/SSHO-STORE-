@@ -152,6 +152,26 @@ svg{flex-shrink:0}
 
 /* Compact Binance ID review modal */
 .binance-id-panel{display:flex;flex-direction:column;gap:9px;padding:2px 1px;max-height:calc(100dvh - 145px);overflow:hidden;font-size:12px}.binance-brand-row{display:flex;align-items:center;gap:9px;background:#17131d;border:1px solid var(--line);border-radius:13px;padding:9px}.binance-mini-icon{width:35px;height:35px;display:grid;place-items:center;background:#f0b90b;color:#17120a;border-radius:10px;flex-shrink:0}.binance-mini-icon svg{width:25px;height:25px}.binance-brand-row>div{display:flex;flex-direction:column;gap:3px;min-width:0}.binance-brand-row b{font-size:13px}.binance-brand-row small{font-size:10px;color:var(--muted)}.binance-amount{margin-right:auto;direction:ltr;font-weight:800;font-size:12px;color:#f0b90b}.binance-id-label,.binance-customer-label{font-size:11px;color:var(--muted);font-weight:700}.binance-id-copyrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:rgba(240,185,11,.09);border:1px solid rgba(240,185,11,.38);border-radius:12px}.binance-id-copyrow strong{font-size:23px;letter-spacing:1px;color:#f0b90b}.binance-copy-btn{border:0;border-radius:9px;background:#f0b90b;color:#17120a;font-weight:800;padding:8px 14px}.binance-id-hint{font-size:10px;color:var(--muted);line-height:1.5}.binance-customer-input{width:100%;min-height:40px!important;padding:9px 11px!important;font-size:13px!important;box-sizing:border-box}.binance-review-note{font-size:10px;line-height:1.5;background:rgba(240,185,11,.08);border:1px solid rgba(240,185,11,.2);border-radius:9px;padding:8px;color:var(--text)}.binance-actions{display:grid;grid-template-columns:.8fr 1.4fr;gap:8px;margin-top:1px}.binance-actions button{min-height:40px;padding:9px;font-size:12px}.binance-actions button:disabled{opacity:.6}@media(max-height:700px){.binance-id-panel{gap:6px}.binance-brand-row{padding:7px}.binance-id-copyrow{padding:7px 10px}.binance-id-copyrow strong{font-size:20px}.binance-review-note{padding:6px}}
+/* SSHO STORE refreshed product presentation */
+.dot{display:none!important}
+.product{padding:0!important;overflow:hidden;background:#101d2c!important;border:1px solid #27364b!important;border-radius:22px!important;display:flex;flex-direction:column}
+.product-art{height:145px;border-radius:0;margin:0;background:linear-gradient(145deg,#0b1d34,#18395b,#091421)}
+.product-art:before{width:125px;height:125px;border-color:#4e9eff30}
+.product-art svg{width:54px;height:54px;color:#9cc9ff}
+.product h3{font-size:16px;line-height:1.45;margin:0;padding:13px 13px 0;color:#f5f8ff;text-align:right}
+.product .duration{padding:0 13px;font-size:13px;line-height:1.5;color:#aebbd0;text-align:right;min-height:40px}
+.product .price-row{padding:10px 13px 0;margin-top:auto}
+.product .price{font-size:23px;font-weight:850;color:#c1d8ff}
+.product .details-btn{align-self:stretch;margin:10px 13px 13px;background:transparent;border:0;border-top:1px solid #ffffff17;border-radius:0;color:#c1d6f7;padding:12px 0 0;font-size:13px;text-align:right}
+.product .instant{top:8px;right:8px;background:#102c2b;color:#8fd6c0;border:1px solid #2d665b;padding:5px 8px;border-radius:20px;font-size:10px}
+.product-details-compact{gap:12px!important}
+.product-details-compact>.product-art{height:145px!important;border-radius:15px!important;overflow:hidden}
+.product-details-description{line-height:1.8}
+.product-detail-section{padding:12px 13px;border:1px solid #ffffff12;border-radius:14px;background:#1a2230;text-align:right;margin:10px 0}
+.product-detail-section h4{margin:0 0 7px;color:#dce8fa;font-size:14px}
+.product-detail-section p,.product-usage{margin:0;color:#aebbd0;font-size:13px;line-height:1.85;white-space:pre-line}
+.product-modal .modal-body{max-height:68vh;overflow-y:auto}
+@media(max-width:420px){.product-art{height:125px}.product h3{font-size:14px}.product .price{font-size:20px}.product .details-btn{font-size:12px}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -164,7 +184,7 @@ svg{flex-shrink:0}
   </div>
   <div style="display:flex;align-items:center;gap:8px">
     <button class="quick-balance" onclick="go('wallet')" aria-label="عرض الرصيد"><span class="balance-value">$0.00</span> <small>USD</small></button>
-    <button class="icon-btn" onclick="openNotifications()" aria-label="الإشعارات"><span class="dot"></span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <button class="icon-btn" onclick="openNotifications()" aria-label="الإشعارات"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   </div>
 </header>
 
@@ -288,7 +308,9 @@ function showProduct(id){
   <div class="product-details-compact">
    <div class="product-art" style="height:92px;margin-bottom:9px">${iconSvgs[p.icon]||iconSvgs.spark}</div>
    <p class="subtext product-details-description">${escapeHtml(p.desc||"")}</p>
-   <div class="product-details-price"><span class="subtext">السعر</span><strong>$${money(p.price)} <small>USD</small></strong></div>
+   <div class="product-details-price"><span class="subtext">السعر</span><strong>${money(p.price)} <small>USD</small></strong></div>
+   <section class="product-detail-section"><h4>تنبيهات وملاحظات مهمة</h4><p>${escapeHtml(p.notice||p.important_notes||"يرجى مراجعة تفاصيل المنتج قبل إتمام الشراء.")}</p></section>
+   <section class="product-detail-section"><h4>طريقة الاستخدام</h4><div class="product-usage">${escapeHtml(p.how_to_use||p.usage_instructions||p.usage||"تعليمات الاستخدام الخاصة بهذا المنتج ستظهر هنا عند إضافتها إلى بياناته.")}</div></section>
    
    <div class="product-details-actions">
     <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" onclick="requestPurchase('${p.id}')">شراء من الرصيد</button>
