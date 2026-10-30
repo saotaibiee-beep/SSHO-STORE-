@@ -93,6 +93,61 @@ svg{flex-shrink:0}
 .giftcard-code-inline .field{margin-top:0}
 .giftcard-page .giftcard-instructions .giftcard-code-inline{grid-column:1/-1}
 
+
+/* Compact responsive modal system: mobile-first, with a one-screen USDT deposit sheet */
+.modal-backdrop{align-items:center;padding: max(6px,env(safe-area-inset-top)) 10px max(6px,env(safe-area-inset-bottom));overflow:hidden}
+.modal{width:min(100%,520px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);height:auto;overflow-y:auto;overscroll-behavior:contain;border-radius:20px;padding:14px 14px calc(12px + env(safe-area-inset-bottom));scrollbar-width:thin}
+.modal-top{position:sticky;top:-14px;z-index:5;background:#171320;margin:-14px -14px 10px;padding:10px 14px 8px;border-bottom:1px solid #ffffff0c}
+.modal h2{font-size:16px}
+.close{flex-shrink:0;width:32px;height:32px}
+#modalBody{min-width:0}
+.deposit-modal-content{display:flex;flex-direction:column;gap:0}
+.deposit-summary{gap:5px;padding:8px 7px;margin:6px 0 8px;border-radius:12px}
+.deposit-summary-item{padding:0 5px}
+.deposit-summary-label{font-size:9px;margin-bottom:2px}
+.deposit-summary-value{font-size:12px;line-height:1.35}
+.deposit-token{font-size:14px;gap:5px}
+.deposit-qr-card{padding:8px 9px;margin-top:6px;border-radius:13px}
+.deposit-qr-title{font-size:13px;margin-bottom:6px}
+.deposit-qr-frame{width:clamp(104px,26dvh,142px);height:clamp(104px,26dvh,142px);padding:5px;border-width:1px;border-radius:12px;margin:0 auto 7px}
+.deposit-qr-frame canvas,.deposit-qr-frame img{width:100%!important;height:100%!important;object-fit:contain}
+.deposit-networks{gap:5px;margin:6px 0}
+.deposit-network{padding:7px 2px;border-radius:10px;font-size:11px;line-height:1.2}
+.deposit-network small{font-size:8px;margin-top:2px}
+.deposit-address-card{gap:6px;padding:7px 9px;margin-top:5px;border-radius:10px}
+.deposit-address-text{font-size:10px;line-height:1.35;max-height:2.7em;overflow:auto;word-break:break-all}
+.deposit-copy{padding:9px 10px;margin-top:6px;border-radius:10px;font-size:12px}
+.deposit-warning{padding:7px 9px;margin:6px 0;font-size:9px;line-height:1.45;border-radius:10px}
+.deposit-verify{margin-top:6px;padding-top:6px}
+.deposit-verify label{font-size:10px;margin-bottom:3px}
+.deposit-verify .field{margin-top:4px;padding:8px 10px;font-size:12px}
+.deposit-verify .wide{margin-top:6px}
+#modalBody .wide{margin-top:7px}
+#modalBody .notice{padding:8px 10px;margin:7px 0;font-size:10px;line-height:1.5}
+.giftcard-page{gap:8px}
+.giftcard-page .giftcard-instructions,.giftcard-notes,.giftcard-code-card{padding:10px;border-radius:13px;line-height:1.6}
+.giftcard-page .giftcard-instructions h3,.giftcard-notes h3{font-size:15px;margin-bottom:7px}
+.gift-step{grid-template-columns:32px minmax(0,1fr);gap:7px;margin:7px 0}
+.gift-step p{font-size:12px;line-height:1.55}
+.gift-step-icon{width:30px!important;height:30px!important}
+.giftcard-code-card label{font-size:11px;margin-bottom:5px}
+.giftcard-code-card .field{margin-top:0;padding:9px 10px}
+.giftcard-notes li{margin:3px 0;font-size:11px;line-height:1.5}
+.giftcard-page .primary.wide{margin-top:6px;padding:10px}
+@media(max-height:740px){
+ .modal{padding:10px 11px calc(8px + env(safe-area-inset-bottom));border-radius:16px}
+ .modal-top{top:-10px;margin:-10px -11px 6px;padding:6px 11px}
+ .deposit-summary{margin:4px 0 5px;padding:6px}
+ .deposit-networks{margin:4px 0}
+ .deposit-qr-card{margin-top:4px;padding:6px}
+ .deposit-qr-frame{width:clamp(94px,21dvh,122px);height:clamp(94px,21dvh,122px);margin-bottom:5px}
+ .deposit-address-card{padding:5px 7px;margin-top:4px}
+ .deposit-copy{padding:7px;margin-top:4px}
+ .deposit-warning{padding:5px 7px;margin:4px 0}
+}
+@media(min-width:520px){.modal-backdrop{padding:16px}.modal{max-height:calc(100dvh - 32px);border-radius:20px;margin:0}}
+@media(max-width:360px){.deposit-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.deposit-token{grid-column:auto}.deposit-qr-frame{width:clamp(90px,20dvh,116px);height:clamp(90px,20dvh,116px)}.deposit-network{font-size:10px}}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
