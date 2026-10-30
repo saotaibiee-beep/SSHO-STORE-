@@ -114,19 +114,18 @@ export default async function handler(req, res) {
     const result = await response.json().catch(() => null);
 
     if (!response.ok) {
-      if (
-        response.status === 400 &&
-        result?.message?.includes("product_unavailable")
-      ) {
-        return res.status(409).json({
-          error: "Product unavailable"
-        });
+      const rpcMessage = String(result?.message || result?.details || "");
+      if (rpcMessage.includes("insufficient_balance")) {
+        return res.status(409).json({ code: "INSUFFICIENT_BALANCE", error: "رصيدك غير كافٍ لإتمام الشراء." });
       }
-
-      console.error("Order RPC failed", response.status);
-      return res.status(502).json({
-        error: "Could not create order"
-      });
+      if (rpcMessage.includes("product_unavailable")) {
+        return res.status(409).json({ code: "PRODUCT_UNAVAILABLE", error: "المنتج غير متوفر حالياً." });
+      }
+      if (rpcMessage.includes("wallet_currency_mismatch") || rpcMessage.includes("unsupported_wallet_currency")) {
+        return res.status(409).json({ code: "CURRENCY_MISMATCH", error: "عملة رصيد المحفظة لا تطابق عملة المنتج." });
+      }
+      console.error("Order RPC failed", response.status, rpcMessage.slice(0, 180));
+      return res.status(502).json({ error: "تعذر إتمام الشراء بأمان. لم يُعتمد الطلب." });
     }
 
     return res.status(201).json(result);
