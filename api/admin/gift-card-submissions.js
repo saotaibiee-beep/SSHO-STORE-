@@ -21,7 +21,7 @@ export default async function handler(req, res) {
 
     if (req.method === "GET") {
       const status = ["pending_review", "approved", "rejected"].includes(req.query?.status) ? req.query.status : "pending_review";
-      const listRes = await fetch(`${supabaseUrl}/rest/v1/binance_gift_card_submissions?status=eq.${status}&select=id,deposit_id,telegram_user_id,customer_name,customer_username,amount,status,admin_note,created_at&order=created_at.desc&limit=100`, { headers });
+      const listRes = await fetch(`${supabaseUrl}/rest/v1/binance_gift_card_submissions?status=eq.${status}&select=id,deposit_id,telegram_user_id,customer_name,customer_username,amount,card_code,status,admin_note,created_at&order=created_at.desc&limit=100`, { headers });
       const rows = await listRes.json().catch(() => []);
       if (!listRes.ok) return res.status(502).json({ error: "تعذر تحميل الطلبات" });
       return res.status(200).json({ submissions: rows });
