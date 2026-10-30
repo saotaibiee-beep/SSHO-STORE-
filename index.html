@@ -672,19 +672,38 @@ applyTelegramUser();
 checkAdminAccess();
 </script>
 <script>
-(async function loadServerWalletBalance(){
- const initData=window.Telegram?.WebApp?.initData||"";
- if(!initData)return;
- try{
-  const response=await fetch("/api/wallet",{method:"GET",cache:"no-store",headers:{"Authorization":"tma "+initData}});
-  if(!response.ok)return;
-  const data=await response.json();
-  const amount=Number(data.balance);
-  if(!Number.isFinite(amount))return;
-  document.querySelectorAll(".balance-value").forEach(el=>{el.textContent="$"+amount.toFixed(2)});
-  const walletBalance=document.querySelector(".wallet-number");
-  if(walletBalance)walletBalance.textContent="$"+amount.toFixed(2);
- }catch(error){console.warn("Wallet balance unavailable",error?.message)}
+(function serverWalletBalanceSync(){
+ const INTERVAL_MS=15000;
+ let lastBalance=null;
+ let busy=false;
+ async function refreshWalletBalance(){
+  const initData=window.Telegram?.WebApp?.initData||"";
+  if(!initData||busy||document.visibilityState==="hidden")return;
+  busy=true;
+  try{
+   const response=await fetch("/api/wallet",{method:"GET",cache:"no-store",headers:{"Authorization":"tma "+initData}});
+   if(!response.ok)return;
+   const data=await response.json();
+   const amount=Number(data.balance);
+   if(!Number.isFinite(amount)||amount<0)return;
+   const currency=String(data.currency||"USD").toUpperCase();
+   const formatted=new Intl.NumberFormat("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}).format(amount);
+   const display=(currency==="USD"?"$":currency+" ")+formatted;
+   document.querySelectorAll(".balance-value,.wallet-number").forEach(el=>{
+    if(el.textContent!==display)el.textContent=display;
+   });
+   if(lastBalance!==null&&lastBalance!==amount)window.dispatchEvent(new CustomEvent("ssho:wallet-updated",{detail:{balance:amount,currency}}));
+   lastBalance=amount;
+  }catch(error){console.warn("Wallet balance unavailable",error?.message)}
+  finally{busy=false}
+ }
+ window.refreshSSHOWalletBalance=refreshWalletBalance;
+ refreshWalletBalance();
+ window.setInterval(refreshWalletBalance,INTERVAL_MS);
+ window.addEventListener("focus",refreshWalletBalance);
+ window.addEventListener("pageshow",refreshWalletBalance);
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")refreshWalletBalance()});
+ window.addEventListener("ssho:wallet-refresh",refreshWalletBalance);
 })();
 </script>
 </body>
