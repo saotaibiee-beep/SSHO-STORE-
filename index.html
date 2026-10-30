@@ -148,6 +148,9 @@ svg{flex-shrink:0}
 @media(min-width:520px){.modal-backdrop{padding:16px}.modal{max-height:calc(100dvh - 32px);border-radius:20px;margin:0}}
 @media(max-width:360px){.deposit-summary{grid-template-columns:repeat(3,minmax(0,1fr))}.deposit-token{grid-column:auto}.deposit-qr-frame{width:clamp(90px,20dvh,116px);height:clamp(90px,20dvh,116px)}.deposit-network{font-size:10px}}
 
+
+/* Compact Binance ID review modal */
+.binance-id-panel{display:flex;flex-direction:column;gap:9px;padding:2px 1px;max-height:calc(100dvh - 145px);overflow:hidden;font-size:12px}.binance-brand-row{display:flex;align-items:center;gap:9px;background:#17131d;border:1px solid var(--line);border-radius:13px;padding:9px}.binance-mini-icon{width:35px;height:35px;display:grid;place-items:center;background:#f0b90b;color:#17120a;border-radius:10px;flex-shrink:0}.binance-mini-icon svg{width:25px;height:25px}.binance-brand-row>div{display:flex;flex-direction:column;gap:3px;min-width:0}.binance-brand-row b{font-size:13px}.binance-brand-row small{font-size:10px;color:var(--muted)}.binance-amount{margin-right:auto;direction:ltr;font-weight:800;font-size:12px;color:#f0b90b}.binance-id-label,.binance-customer-label{font-size:11px;color:var(--muted);font-weight:700}.binance-id-copyrow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;background:rgba(240,185,11,.09);border:1px solid rgba(240,185,11,.38);border-radius:12px}.binance-id-copyrow strong{font-size:23px;letter-spacing:1px;color:#f0b90b}.binance-copy-btn{border:0;border-radius:9px;background:#f0b90b;color:#17120a;font-weight:800;padding:8px 14px}.binance-id-hint{font-size:10px;color:var(--muted);line-height:1.5}.binance-customer-input{width:100%;min-height:40px!important;padding:9px 11px!important;font-size:13px!important;box-sizing:border-box}.binance-review-note{font-size:10px;line-height:1.5;background:rgba(240,185,11,.08);border:1px solid rgba(240,185,11,.2);border-radius:9px;padding:8px;color:var(--text)}.binance-actions{display:grid;grid-template-columns:.8fr 1.4fr;gap:8px;margin-top:1px}.binance-actions button{min-height:40px;padding:9px;font-size:12px}.binance-actions button:disabled{opacity:.6}@media(max-height:700px){.binance-id-panel{gap:6px}.binance-brand-row{padding:7px}.binance-id-copyrow{padding:7px 10px}.binance-id-copyrow strong{font-size:20px}.binance-review-note{padding:6px}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -448,9 +451,7 @@ async function createDepositRequest(){
      return;
    }
    if(selectedMethod==="Binance ID"){
-     document.getElementById("modalTitle").textContent="شحن عبر Binance ID";
-     document.getElementById("modalBody").innerHTML='<div class="giftcard-instructions"><h3>تحويل عبر Binance ID</h3><p>أدخل معرّف Binance الخاص بالمستلم في صفحة الدعم أو اتبع بيانات التحويل التي يزوّدك بها الدعم قبل الدفع. لا ترسل كلمة المرور أو رمز التحقق.</p><p><b>المبلغ:</b> '+money(amount)+' USDT</p><p>لا يتم تأكيد الشحن تلقائيًا من هذه الصفحة؛ يحتاج التحويل إلى مراجعة.</p></div><button class="secondary wide" onclick="closeModal()">إغلاق</button>';
-     openModal();return;
+     renderBinanceIdReview(amount, Number(d.depositId)); return;
    }
    if(!address||!network) throw new Error("عنوان هذه الشبكة غير مضبوط");
    document.getElementById("modalTitle").textContent="تفاصيل شحن USDT";
@@ -494,6 +495,40 @@ async function createDepositRequest(){
 
 
 
+function renderBinanceIdReview(amount,depositId){
+ document.getElementById("modalTitle").textContent="شحن عبر Binance ID";
+ document.getElementById("modalBody").innerHTML=
+ '<div class="binance-id-panel">'+
+ '<div class="binance-brand-row"><span class="binance-mini-icon" aria-hidden="true"><svg viewBox="0 0 48 48" fill="currentColor"><path d="M24 2 34 12 27 19 24 16 21 19 14 12 24 2ZM12 14l7 7-3 3 3 3-7 7-10-10 10-10Zm24 0 10 10-10 10-7-7 3-3-3-3 7-7ZM24 32l3-3 7 7-10 10-10-10 7-7 3 3Z"/><path d="m24 20 4 4-4 4-4-4 4-4Z"/></svg></span><div><b>Binance Pay</b><small>تحويل سريع وآمن</small></div><span class="binance-amount">'+money(amount)+' USDT</span></div>'+
+ '<div class="binance-id-label">معرّف المتجر (Binance ID)</div>'+
+ '<div class="binance-id-copyrow"><strong dir="ltr">176284440</strong><button type="button" class="binance-copy-btn" onclick="copyBinanceStoreId()">نسخ</button></div>'+
+ '<div class="binance-id-hint">حوّل المبلغ أعلاه إلى معرّف المتجر من تطبيق Binance.</div>'+
+ '<label class="binance-customer-label" for="binanceCustomerRef">معرّف Binance الخاص بك أو رقم المعاملة</label>'+
+ '<input id="binanceCustomerRef" class="field binance-customer-input" maxlength="160" autocomplete="off" placeholder="أدخل Binance ID أو TxID" />'+
+ '<div class="binance-review-note">لن يُضاف الرصيد فور الإرسال؛ سيُراجع الطلب من الإدارة بعد التحقق من التحويل.</div>'+
+ '<div class="binance-actions"><button type="button" class="secondary" onclick="closeModal()">إغلاق</button><button type="button" class="primary" id="submitBinanceReviewBtn" onclick="submitBinanceIdReview('+Number(depositId)+')">إرسال للمراجعة</button></div>'+
+ '</div>';
+ openModal();
+}
+async function copyBinanceStoreId(){
+ try{await navigator.clipboard.writeText("176284440");showToast("تم نسخ Binance ID");}
+ catch(e){const x=document.createElement("textarea");x.value="176284440";x.style.position="fixed";x.style.opacity="0";document.body.appendChild(x);x.select();const ok=document.execCommand("copy");x.remove();showToast(ok?"تم نسخ Binance ID":"تعذر النسخ؛ انسخ الرقم يدويًا");}
+}
+async function submitBinanceIdReview(depositId){
+ const input=document.getElementById("binanceCustomerRef");
+ const customerReference=(input?.value||"").trim();
+ if(customerReference.length<3||customerReference.length>160){showToast("أدخل Binance ID أو رقم معاملة صحيحًا");input?.focus();return;}
+ const initData=window.Telegram?.WebApp?.initData||"";
+ if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
+ const button=document.getElementById("submitBinanceReviewBtn");
+ if(button){button.disabled=true;button.textContent="جارٍ الإرسال…";}
+ try{
+  const r=await fetch("/api/deposits/review",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({depositId,customerReference})});
+  const data=await r.json().catch(()=>({}));
+  if(!r.ok)throw new Error(data.error||"تعذر إرسال الطلب للمراجعة");
+  openInfo("تم إرسال طلب الشحن للمراجعة","رقم الطلب: <b>"+Number(data.depositId||depositId)+"</b><br>الحالة: <b>قيد المراجعة</b><br><br>سيتم إضافة الرصيد بعد تحقق الإدارة من التحويل.");
+ }catch(e){showToast(e.message||"تعذر إرسال الطلب");if(button){button.disabled=false;button.textContent="إرسال للمراجعة";}}
+}
 function renderBinanceGiftCard(amount,depositId){
  document.getElementById("modalTitle").textContent="شحن الرصيد ببطاقة Binance Gift Card";
  document.getElementById("modalBody").innerHTML=
