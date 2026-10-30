@@ -671,6 +671,22 @@ renderOrders();
 applyTelegramUser();
 checkAdminAccess();
 </script>
+<script>
+(async function loadServerWalletBalance(){
+ const initData=window.Telegram?.WebApp?.initData||"";
+ if(!initData)return;
+ try{
+  const response=await fetch("/api/wallet",{method:"GET",cache:"no-store",headers:{"Authorization":"tma "+initData}});
+  if(!response.ok)return;
+  const data=await response.json();
+  const amount=Number(data.balance);
+  if(!Number.isFinite(amount))return;
+  document.querySelectorAll(".balance-value").forEach(el=>{el.textContent="$"+amount.toFixed(2)});
+  const walletBalance=document.querySelector(".wallet-number");
+  if(walletBalance)walletBalance.textContent="$"+amount.toFixed(2);
+ }catch(error){console.warn("Wallet balance unavailable",error?.message)}
+})();
+</script>
 </body>
 </html>
 
