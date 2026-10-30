@@ -38,7 +38,7 @@ button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:tran
 .deposit-verify{margin-top:12px;padding-top:12px;border-top:1px solid #ffffff14}
 .deposit-verify label{display:block;font-size:11px;color:#aaa0c5;margin-bottom:7px}
 @media(max-width:360px){.deposit-summary{grid-template-columns:1fr 1fr}.deposit-token{grid-column:1/-1}.deposit-networks{gap:4px}.deposit-network{font-size:11px}.deposit-network small{font-size:8px}.deposit-qr-frame{width:170px;height:170px}}
-.notice{border:1px solid #a66aff2b;background:#21182d;color:#cdb8e7;border-radius:13px;padding:12px;font-size:11px;line-height:1.8;margin:12px 0}.toast{position:fixed;z-index:70;bottom:95px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#292036;border:1px solid #b789ff40;color:#f4eaff;padding:12px 16px;border-radius:13px;font-size:12px;box-shadow:0 8px 28px #0008;transition:.22s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}.admin-badge{display:none;background:#322044;border:1px solid #a66aff40;border-radius:10px;padding:8px 10px;color:#d9bcff;font-size:10px;margin:12px 0}.admin-badge.show{display:block}.order-card{padding:14px;border-radius:15px;border:1px solid var(--line);background:#15121f;margin-bottom:9px}.order-card-top{display:flex;justify-content:space-between;gap:10px}.status{font-size:9px;border-radius:7px;padding:5px 7px;background:#30213e;color:#d7baff;white-space:nowrap}.order-card p{font-size:10px;color:#9d92ab;margin:7px 0 0}.hide-balance .balance-value{filter:blur(7px);user-select:none}@keyframes slide{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}@media(min-width:520px){.bottom-nav{left:50%;right:auto;width:520px;transform:translateX(-50%);border-left:1px solid #ffffff0c;border-right:1px solid #ffffff0c;border-radius:20px 20px 0 0}.modal-backdrop{align-items:center}.modal{border-radius:24px;margin:16px}}
+.notice{border:1px solid #a66aff2b;background:#21182d;color:#cdb8e7;border-radius:13px;padding:12px;font-size:11px;line-height:1.8;margin:12px 0}.toast{position:fixed;z-index:70;bottom:95px;left:50%;transform:translate(-50%,12px);opacity:0;pointer-events:none;background:#292036;border:1px solid #b789ff40;color:#f4eaff;padding:12px 16px;border-radius:13px;font-size:12px;box-shadow:0 8px 28px #0008;transition:.22s;white-space:nowrap}.toast.show{opacity:1;transform:translate(-50%,0)}.admin-badge{display:none;background:#322044;border:1px solid #a66aff40;border-radius:10px;padding:8px 10px;color:#d9bcff;font-size:10px;margin:12px 0}.admin-badge.show{display:block}.order-card{padding:14px;border-radius:15px;border:1px solid var(--line);background:#15121f;margin-bottom:9px}.order-card-top{display:flex;justify-content:space-between;gap:10px}.order-card-status{display:flex;align-items:flex-start;gap:7px;flex-shrink:0}.order-delete-btn{width:31px;height:31px;display:grid;place-items:center;border:1px solid #168dff45;background:#168dff12;color:#38baff;border-radius:10px;padding:6px;transition:background .15s,border-color .15s}.order-delete-btn svg{width:17px;height:17px}.order-delete-btn:active{background:#168dff30}.order-delete-btn:disabled{opacity:.5}.order-delete-btn.is-loading{opacity:.45;pointer-events:none}.status{font-size:9px;border-radius:7px;padding:5px 7px;background:#30213e;color:#d7baff;white-space:nowrap}.order-card p{font-size:10px;color:#9d92ab;margin:7px 0 0}.hide-balance .balance-value{filter:blur(7px);user-select:none}@keyframes slide{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}@media(min-width:520px){.bottom-nav{left:50%;right:auto;width:520px;transform:translateX(-50%);border-left:1px solid #ffffff0c;border-right:1px solid #ffffff0c;border-radius:20px 20px 0 0}.modal-backdrop{align-items:center}.modal{border-radius:24px;margin:16px}}
 
 .deposit-network{cursor:pointer;user-select:none;touch-action:manipulation}
 .deposit-network:focus-visible,.deposit-copy:focus-visible{outline:2px solid #8bb8ff;outline-offset:3px}
@@ -356,12 +356,14 @@ async function requestPurchase(id){
     }
 
     orders = (Array.isArray(data.orders) ? data.orders : []).map(o => ({
+      dbId: String(o.id || ""),
       id: String(o.order_number || o.id || ""),
       name: String(o.product_name || "منتج"),
       date: o.created_at
         ? new Date(o.created_at).toLocaleDateString("ar-SA")
         : "",
       price: Number(o.unit_price || 0),
+      currency: String(o.currency || "USD"),
       status: o.status === "completed"
         ? "completed"
         : (o.status === "awaiting_payment" ? "pending" : o.status)
@@ -403,6 +405,7 @@ function renderOrders(){
     const status = labels[o.status] || "قيد المراجعة";
     const currency = o.currency || "USD";
 
+    const deleteButton = o.status === "completed" ? "" : `<button type="button" class="order-delete-btn" title="حذف الطلب" aria-label="حذف الطلب" onclick="deleteOrder('${escapeHtml(o.dbId)}',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2m-11 0 1 14h12l1-14M10 10v6m4-6v6"/></svg></button>`;
     return `<div class="order-card">
       <div class="order-card-top">
         <div>
@@ -410,7 +413,7 @@ function renderOrders(){
           <p>رقم الطلب: ${escapeHtml(o.id)}</p>
           <p>تاريخ الطلب: ${escapeHtml(o.date || "غير متوفر")}</p>
         </div>
-        <span class="status">${status}</span>
+        <div class="order-card-status"><span class="status">${status}</span>${deleteButton}</div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:12px">
         <span class="subtext">الإجمالي</span>
@@ -418,6 +421,26 @@ function renderOrders(){
       </div>
     </div>`;
   }).join("");
+}
+async function deleteOrder(orderId,button){
+ if(!orderId||button?.disabled)return;
+ const order=orders.find(o=>o.dbId===orderId);
+ if(!order||order.status==="completed"){showToast("لا يمكن حذف الطلب المكتمل");return;}
+ if(!window.confirm("هل تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذه العملية."))return;
+ const initData=window.Telegram?.WebApp?.initData||"";
+ if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
+ if(button){button.disabled=true;button.classList.add("is-loading");}
+ try{
+  const response=await fetch("/api/orders",{method:"DELETE",cache:"no-store",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({orderId})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||"تعذر حذف الطلب");
+  orders=orders.filter(o=>o.dbId!==orderId);
+  renderOrders();updateStats();showToast("تم حذف الطلب");
+ }catch(error){
+  console.error("Delete order failed:",error);
+  showToast(error.message||"تعذر حذف الطلب");
+  if(button){button.disabled=false;button.classList.remove("is-loading");}
+ }
 }
 function chooseMethod(el){document.querySelectorAll(".method").forEach(b=>b.classList.remove("selected"));el.classList.add("selected");selectedMethod=el.dataset.method}
 function chooseAmount(n,el){quickAmount=n;document.querySelectorAll(".amount").forEach(b=>b.classList.remove("active"));el.classList.add("active");document.getElementById("customAmount").value=""}
