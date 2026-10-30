@@ -44,29 +44,37 @@ export default async function handler(req, res) {
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) {
       return res.status(400).json({ error: "معرّف الطلب غير صالح" });
     }
+
     try {
+      // Soft-delete only unpaid orders. Keep the order and all related financial records.
       const query = new URLSearchParams({
         id: `eq.${orderId}`,
         telegram_id: `eq.${user.id}`,
-        status: "neq.completed",
-        select: "id,status"
+        status: "eq.awaiting_payment",
+        is_deleted: "eq.false",
+        select: "id,status,is_deleted"
       });
+
       const response = await fetch(`${baseUrl}/rest/v1/orders?${query.toString()}`, {
-        method: "DELETE",
+        method: "PATCH",
         headers: {
+          "Content-Type": "application/json",
           apikey: serviceKey,
           Authorization: `Bearer ${serviceKey}`,
           Prefer: "return=representation"
-        }
+        },
+        body: JSON.stringify({ is_deleted: true })
       });
+
       const result = await response.json().catch(() => null);
       if (!response.ok) {
-        console.error("Delete order failed", response.status, JSON.stringify(result).slice(0, 180));
-        return res.status(409).json({ error: "تعذر حذف الطلب؛ قد يكون مرتبطاً بعملية دفع أو سجل مالي." });
+        console.error("Soft-delete order failed", response.status, JSON.stringify(result).slice(0, 180));
+        return res.status(502).json({ error: "تعذر إخفاء الطلب حالياً. حاول مرة أخرى." });
       }
+
       if (!Array.isArray(result) || result.length === 0) {
         const checkQuery = new URLSearchParams({
-          select: "id,status",
+          select: "id,status,is_deleted",
           id: `eq.${orderId}`,
           telegram_id: `eq.${user.id}`,
           limit: "1"
@@ -75,15 +83,22 @@ export default async function handler(req, res) {
           headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
         });
         const rows = await check.json().catch(() => []);
-        if (Array.isArray(rows) && rows[0]?.status === "completed") {
-          return res.status(409).json({ error: "لا يمكن حذف الطلب المكتمل حفاظاً على السجل المالي." });
+        if (!Array.isArray(rows) || rows.length === 0) {
+          return res.status(404).json({ error: "الطلب غير موجود." });
         }
-        return res.status(404).json({ error: "الطلب غير موجود أو لا تملك صلاحية حذفه." });
+        if (rows[0].is_deleted === true) {
+          return res.status(200).json({ success: true, hidden: true, orderId });
+        }
+        if (rows[0].status === "completed" || rows[0].status === "paid") {
+          return res.status(409).json({ error: "لا يمكن إخفاء الطلب المدفوع أو المكتمل حفاظاً على السجل المالي." });
+        }
+        return res.status(409).json({ error: "يمكن إخفاء الطلبات التي بانتظار الدفع فقط." });
       }
-      return res.status(200).json({ success: true, deletedId: result[0].id });
+
+      return res.status(200).json({ success: true, hidden: true, orderId: result[0].id });
     } catch (error) {
-      console.error("Delete order request failed", error?.message);
-      return res.status(502).json({ error: "تعذر حذف الطلب حالياً." });
+      console.error("Soft-delete order request failed", error?.message);
+      return res.status(502).json({ error: "تعذر إخفاء الطلب حالياً. حاول مرة أخرى." });
     }
   }
 
@@ -92,6 +107,7 @@ export default async function handler(req, res) {
       const query = new URLSearchParams({
         select: "id,order_number,product_name,unit_price,currency,status,created_at",
         telegram_id: `eq.${user.id}`,
+        is_deleted: "eq.false",
         order: "created_at.desc",
         limit: "100"
       });
