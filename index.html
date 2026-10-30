@@ -289,7 +289,7 @@ function showProduct(id){
    <div class="product-art" style="height:92px;margin-bottom:9px">${iconSvgs[p.icon]||iconSvgs.spark}</div>
    <p class="subtext product-details-description">${escapeHtml(p.desc||"")}</p>
    <div class="product-details-price"><span class="subtext">السعر</span><strong>$${money(p.price)} <small>USD</small></strong></div>
-   <div class="notice product-details-notice">اختر طريقة الشراء. الشراء من الرصيد يخصم المبلغ عبر الخادم بشكل ذري، والدفع عبر USDT ينشئ طلب شحن للمراجعة.</div>
+   
    <div class="product-details-actions">
     <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" onclick="requestPurchase('${p.id}')">شراء من الرصيد</button>
     <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" onclick="requestProductUsdt('${p.id}')">شراء الآن <span>USDT</span></button>
