@@ -223,46 +223,21 @@ if(page==="orders")loadOrders();if(page==="account")updateStats();
 function showProduct(id){
  const p=products.find(x=>x.id===id);if(!p)return;
  document.getElementById("modalTitle").textContent=p.name;
- document.getElementById("modalBody").innerHTML=`<div class="product-art" style="height:130px">${iconSvgs[p.icon]}</div><p class="subtext" style="margin:15px 0">${escapeHtml(p.desc)}</p><div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><span class="subtext">السعر</span><strong style="font-size:22px;direction:ltr">$${money(p.price)}</strong></div><div class="notice">سيتم تسجيل الطلب للتسليم اليدوي فقط بعد ربط الخادم والتحقق من الدفع. لا يتم إنشاء طلب حقيقي في هذه النسخة.</div><button class="primary wide" onclick="requestPurchase('${p.id}')">طلب المنتج</button>`;
+ document.getElementById("modalBody").innerHTML=`<div class="product-art" style="height:130px">${iconSvgs[p.icon]}</div><p class="subtext" style="margin:15px 0">${escapeHtml(p.desc)}</p><div style="display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)"><span class="subtext">السعر</span><strong style="font-size:22px;direction:ltr">$${money(p.price)}</strong></div><div class="notice">سيتم خصم السعر من رصيد محفظتك عند نجاح الشراء. تأكد من كفاية الرصيد قبل المتابعة.</div><button class="primary wide" onclick="requestPurchase('${p.id}')">شراء الآن من الرصيد</button>`;
  openModal();
 }
 async function requestPurchase(id){
-const p=products.find(x=>x.id===id);
-if(!p)return;
-
-const initData=window.Telegram?.WebApp?.initData||"";
-if(!initData){
-showToast("افتح المتجر من داخل تيليجرام");
-return;
-}
-
-const idempotencyKey=window.crypto?.randomUUID
-?window.crypto.randomUUID()
-:"order-"+Date.now()+"-"+Math.random().toString(36).slice(2);
-
-try{
-const r=await fetch("/api/orders",{
-method:"POST",
-headers:{
-"Content-Type":"application/json",
-"Authorization":"tma "+initData
-},
-body:JSON.stringify({
-productId:id,
-idempotencyKey:idempotencyKey
-})
-});
-
-const d=await r.json().catch(()=>({}));
-if(!r.ok)throw new Error(d.error||"تعذر إنشاء الطلب");
-
-closeModal();
-showToast("تم تسجيل الطلب بنجاح");
-go("orders");
-}catch(e){
-console.error("Purchase error:",e);
-showToast(e.message||"تعذر إنشاء الطلب، حاول لاحقاً");
-}
+const p=products.find(x=>x.id===id);if(!p)return;
+const buttons=document.querySelectorAll('#modalBody button');const button=buttons[buttons.length-1];if(button&&button.disabled)return;
+if(button){button.disabled=true;button.textContent='جارٍ التحقق والشراء...';}
+const initData=window.Telegram?.WebApp?.initData||'';
+if(!initData){if(button){button.disabled=false;button.textContent='شراء الآن من الرصيد';}showToast('افتح المتجر من داخل تيليجرام');return;}
+const idempotencyKey=window.crypto?.randomUUID?window.crypto.randomUUID():'order-'+Date.now()+'-'+Math.random().toString(36).slice(2);
+try{const r=await fetch('/api/orders',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'tma '+initData},body:JSON.stringify({productId:id,idempotencyKey})});
+const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'تعذر إتمام الشراء');
+closeModal();if(typeof window.refreshSSHOWalletBalance==='function')await window.refreshSSHOWalletBalance();
+showToast(d.duplicate?'هذا الطلب مسجل مسبقاً':'تم الشراء وخصم الرصيد بنجاح');await loadOrders();go('orders');
+}catch(e){console.error('Purchase error:',e);showToast(e.message||'تعذر إتمام الشراء');if(button){button.disabled=false;button.textContent='شراء الآن من الرصيد';}}
 }
   async function loadOrders(){
   const initData = window.Telegram?.WebApp?.initData || "";
