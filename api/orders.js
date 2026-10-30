@@ -3,8 +3,8 @@ import { verifyTelegramInitData } from "./_lib/telegram.js";
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
-  if (req.method !== "POST" && req.method !== "GET") {
-    res.setHeader("Allow", "GET, POST");
+  if (req.method !== "POST" && req.method !== "GET" && req.method !== "DELETE") {
+    res.setHeader("Allow", "GET, POST, DELETE");
     return res.status(405).json({ error: "Method not allowed" });
   }
 
@@ -38,6 +38,54 @@ export default async function handler(req, res) {
   }
 
   const baseUrl = supabaseUrl.replace(/\/+$/, "");
+
+  if (req.method === "DELETE") {
+    const orderId = String(req.body?.orderId || "");
+    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId)) {
+      return res.status(400).json({ error: "معرّف الطلب غير صالح" });
+    }
+    try {
+      const query = new URLSearchParams({
+        id: `eq.${orderId}`,
+        telegram_id: `eq.${user.id}`,
+        status: "neq.completed",
+        select: "id,status"
+      });
+      const response = await fetch(`${baseUrl}/rest/v1/orders?${query.toString()}`, {
+        method: "DELETE",
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          Prefer: "return=representation"
+        }
+      });
+      const result = await response.json().catch(() => null);
+      if (!response.ok) {
+        console.error("Delete order failed", response.status, JSON.stringify(result).slice(0, 180));
+        return res.status(409).json({ error: "تعذر حذف الطلب؛ قد يكون مرتبطاً بعملية دفع أو سجل مالي." });
+      }
+      if (!Array.isArray(result) || result.length === 0) {
+        const checkQuery = new URLSearchParams({
+          select: "id,status",
+          id: `eq.${orderId}`,
+          telegram_id: `eq.${user.id}`,
+          limit: "1"
+        });
+        const check = await fetch(`${baseUrl}/rest/v1/orders?${checkQuery.toString()}`, {
+          headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
+        });
+        const rows = await check.json().catch(() => []);
+        if (Array.isArray(rows) && rows[0]?.status === "completed") {
+          return res.status(409).json({ error: "لا يمكن حذف الطلب المكتمل حفاظاً على السجل المالي." });
+        }
+        return res.status(404).json({ error: "الطلب غير موجود أو لا تملك صلاحية حذفه." });
+      }
+      return res.status(200).json({ success: true, deletedId: result[0].id });
+    } catch (error) {
+      console.error("Delete order request failed", error?.message);
+      return res.status(502).json({ error: "تعذر حذف الطلب حالياً." });
+    }
+  }
 
   if (req.method === "GET") {
     try {
