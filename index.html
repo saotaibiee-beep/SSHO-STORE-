@@ -172,6 +172,13 @@ svg{flex-shrink:0}
 .product-detail-section p,.product-usage{margin:0;color:#aebbd0;font-size:13px;line-height:1.85;white-space:pre-line}
 .product-modal .modal-body{max-height:68vh;overflow-y:auto}
 @media(max-width:420px){.product-art{height:125px}.product h3{font-size:14px}.product .price{font-size:20px}.product .details-btn{font-size:12px}}
+/* Wallet address full-width layout and copy affordance */
+.deposit-address-card{display:flex!important;width:100%;box-sizing:border-box;align-items:stretch;min-width:0;padding:13px 14px}
+.deposit-address-content{display:block;width:100%;min-width:0;flex:1 1 100%;text-align:right}
+.deposit-address-text{display:block;width:100%;max-width:100%;box-sizing:border-box;text-align:left;direction:ltr;overflow-wrap:anywhere;word-break:break-all;user-select:text;-webkit-user-select:text;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:13px;letter-spacing:.15px;padding-top:5px}
+.deposit-copy{display:block;width:100%;min-width:100%;box-sizing:border-box;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;transition:filter .15s,transform .15s}
+.deposit-copy:active{filter:brightness(1.12);transform:scale(.99)}
+.deposit-copy:disabled{opacity:.85;cursor:default}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -547,8 +554,8 @@ async function createDepositRequest(){
        '<div class="deposit-qr-card">'+
          '<div class="deposit-qr-title">امسح رمز QR للتحويل</div>'+
          '<div id="depositQr" class="deposit-qr-frame" aria-label="رمز QR لعنوان المحفظة"></div>'+
-         '<div class="deposit-address-card"><div style="flex:1;min-width:0"><div class="deposit-summary-label">عنوان المحفظة</div><div class="deposit-address-text" dir="ltr" id="depositAddressText">'+escapeHtml(address)+'</div></div></div>'+
-         '<button class="deposit-copy" onclick="copyDepositAddress('+JSON.stringify(address)+')">▢　نسخ عنوان المحفظة</button>'+
+         '<div class="deposit-address-card"><div class="deposit-address-content"><div class="deposit-summary-label">عنوان المحفظة</div><div class="deposit-address-text" dir="ltr" id="depositAddressText">'+escapeHtml(address)+'</div></div></div>'+
+         '<button type="button" class="deposit-copy" id="depositCopyButton" onclick="copyDepositAddress(this.dataset.address)" data-address="'+escapeHtml(address)+'">▢　نسخ عنوان المحفظة</button>'+
        '</div>'+
        '<div class="deposit-warning">تأكد من استخدام شبكة <b>'+escapeHtml(network.short)+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.</div>'+
        (selectedMethod==="USDT BEP20"
@@ -640,11 +647,12 @@ async function submitGiftCardReview(depositId){
  }catch(error){showToast(error.message||"تعذر إرسال الطلب");if(button){button.disabled=false;button.textContent="تأكيد الشحن"}}
 }
 async function copyDepositAddress(address){
- const value=String(address||document.getElementById("depositAddressText")?.textContent||"").trim();
- if(!value){showToast("لا يوجد عنوان لنسخه");return}
+ const button=document.getElementById("depositCopyButton");
+ const value=String(address||button?.dataset.address||document.getElementById("depositAddressText")?.textContent||"").trim();
+ if(!value){showToast("لا يوجد عنوان لنسخه");return false}
  let copied=false;
  try{
-   if(navigator.clipboard && window.isSecureContext){
+   if(navigator.clipboard && typeof navigator.clipboard.writeText==="function"){
      await navigator.clipboard.writeText(value);copied=true;
    }
  }catch(e){}
@@ -653,21 +661,24 @@ async function copyDepositAddress(address){
    try{
      input=document.createElement("textarea");
      input.value=value;input.setAttribute("readonly","");
-     input.style.position="fixed";input.style.left="-9999px";input.style.top="0";
-     input.style.fontSize="16px";document.body.appendChild(input);
+     input.style.position="fixed";input.style.left="0";input.style.top="0";
+     input.style.width="1px";input.style.height="1px";input.style.opacity="0";
+     input.style.fontSize="16px";input.style.zIndex="-1";document.body.appendChild(input);
      input.focus();input.select();input.setSelectionRange(0,input.value.length);
      copied=!!document.execCommand("copy");
    }catch(e){copied=false}
    finally{if(input?.parentNode)input.parentNode.removeChild(input)}
  }
  if(copied){
-   showToast("تم نسخ عنوان المحفظة");
+   if(button){const previous=button.innerHTML;button.textContent="✓ تم نسخ عنوان المحفظة";button.disabled=true;setTimeout(()=>{if(button.isConnected){button.innerHTML=previous;button.disabled=false}},1600)}
+   showToast("تم نسخ عنوان المحفظة بنجاح");
    try{window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred("success")}catch(e){}
- }else{
-   const el=document.getElementById("depositAddressText");
-   if(el){const range=document.createRange();range.selectNodeContents(el);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range)}
-   showToast("تعذر النسخ التلقائي. تم تحديد العنوان؛ اضغط مطولًا ثم نسخ");
+   return true;
  }
+ const el=document.getElementById("depositAddressText");
+ if(el){const range=document.createRange();range.selectNodeContents(el);const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range)}
+ showToast("تعذر النسخ التلقائي؛ تم تحديد العنوان للنسخ اليدوي");
+ return false;
 }
 
 async function switchDepositNetwork(method){
