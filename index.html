@@ -825,7 +825,9 @@ async function loadProducts(){
       price: Number(p.price || 0),
       icon: "spark",
       desc: String(p.description || ""),
-      image: String(p.image_url || "")
+      image: String(p.image_url || ""),
+      notice: String(p.notice || ""),
+      how_to_use: String(p.how_to_use || "")
     }));
     renderProducts();
   } catch (error) {
