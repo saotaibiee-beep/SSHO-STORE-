@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="CapCut Pro - شهر واحد">
-<rect width="1200" height="700" fill="#ffffff"/>
-<path d="M0 535 H1200" stroke="#eef0f7" stroke-width="2"/>
-<path d="M0 555 H1200" stroke="#e9e7f8" stroke-width="2"/>
-<path d="M70 80 H220" stroke="#7c6cff" stroke-width="5" stroke-linecap="round"/>
-<path d="M980 80 H1130" stroke="#7c6cff" stroke-width="5" stroke-linecap="round"/>
-<circle cx="95" cy="605" r="5" fill="#7c6cff" opacity=".45"/><circle cx="1105" cy="605" r="5" fill="#7c6cff" opacity=".45"/>
-<g transform="translate(520 145)" stroke="#111111" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M-70 -35 L70 35 M-70 35 L70 -35"/><path d="M-70 -35 L-15 -35 L70 35 L15 35 Z" stroke-width="11"/><path d="M-70 35 L-15 35 L70 -35 L15 -35 Z" stroke-width="11"/></g>
-<text x="600" y="430" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="700" fill="#111111">CapCut Pro</text>
-<rect x="400" y="475" width="400" height="74" rx="37" fill="#ffffff" stroke="#dcd8f5" stroke-width="2"/>
-<text x="600" y="523" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="600" fill="#343044">شهر واحد</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><rect width="1200" height="700" fill="#ffffff"/><path d="M0 0H1200V18H0Z" fill="#111827"/><circle cx="600" cy="245" r="105" fill="#111827" fill-opacity=".10"/><text x="600" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="150" font-weight="700" fill="#111827">✂</text><text x="600" y="430" text-anchor="middle" font-family="Arial,sans-serif" font-size="68" font-weight="700" fill="#172033">CapCut Pro</text><text x="600" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="600" fill="#111827">1 MONTH • شهر واحد</text></svg>
