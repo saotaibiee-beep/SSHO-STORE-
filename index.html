@@ -192,6 +192,50 @@ svg{flex-shrink:0}
 .product .details-btn{color:#c9c0ef!important;border-top-color:#ffffff14!important}
 .product .instant{background:#171c1b!important;color:#8fd6c0!important;border-color:#2d5149!important}
 
+/* SSHO STORE product catalogue and detail modal refresh */
+.product-showcase{background:linear-gradient(155deg,#17263a,#111b29 72%)!important;border:1px solid #293a50!important;border-radius:22px!important;box-shadow:0 10px 26px #0002;transition:transform .18s,border-color .18s}
+.product-showcase:active{transform:scale(.99)}
+.product-showcase .product-art{height:142px!important;position:relative;background:linear-gradient(145deg,#1a2b42,#101b2b)!important}
+.product-showcase .product-art img{object-fit:contain!important;padding:12px}
+.product-stock-badge{position:absolute;top:9px;right:9px;border-radius:9px;padding:5px 8px;background:#102f2a;color:#a4ead6;border:1px solid #28594e;font-size:10px;font-weight:750}
+.product-stock-badge.out{background:#3a1b27;color:#ffc2cb;border-color:#6e2d3c}
+.product-showcase.is-unavailable{opacity:.82}
+.product-showcase-name{padding:12px 13px 0!important;min-height:54px!important;font-size:15px!important;line-height:1.55!important}
+.product-showcase-duration{padding:6px 13px 10px!important;min-height:48px!important;font-size:12px!important;line-height:1.65!important;color:#aab9ce!important}
+.product-showcase-footer{margin:0 12px!important;padding:12px 0 14px!important;border-top:1px solid #2b3b50!important}
+.product-showcase-footer .details-btn{display:flex;align-items:center;gap:7px;color:#d7e5fb!important;font-weight:750!important}
+.product-showcase-footer .details-btn span{font-size:18px;color:#8db7ff}
+.product-showcase-price{font-size:17px!important;color:#d9e7ff;direction:ltr;white-space:nowrap}
+.product-modal{display:flex;flex-direction:column;max-height:min(88dvh,820px)!important;overflow:hidden!important;background:#111a27!important;border:1px solid #2b3d53!important;padding:14px 15px calc(14px + env(safe-area-inset-bottom))!important}
+.product-modal .modal-top{flex:0 0 auto;margin-bottom:8px!important}
+.product-modal #modalBody{min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:0 1px 6px;scrollbar-width:thin}
+.product-details-layout{display:flex;flex-direction:column;gap:12px}
+.product-details-hero{display:grid;grid-template-columns:108px minmax(0,1fr);gap:13px;align-items:center}
+.product-details-art{height:108px;border-radius:17px;overflow:hidden;display:grid;place-items:center;background:linear-gradient(145deg,#1a2c43,#0d1725);border:1px solid #2b405b}
+.product-details-art img{width:100%;height:100%;object-fit:contain;padding:8px}
+.product-details-art svg{width:48px;height:48px;color:#a8c8ff}
+.product-details-heading h3{font-size:17px;line-height:1.5;margin:0 0 5px;color:#f2f6ff}
+.product-details-heading p{font-size:12px;line-height:1.65;color:#aab9ce;margin:0;white-space:pre-line}
+.product-details-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.product-details-summary>div{border:1px solid #2a3b51;border-radius:14px;background:#172435;padding:12px}
+.product-details-summary small{display:block;font-size:11px;color:#9eafc7;margin-bottom:6px}
+.product-details-summary strong{font-size:16px;line-height:1.4;color:#edf4ff;overflow-wrap:anywhere}
+.product-details-summary .stock-available{color:#91e0c2}.product-details-summary .stock-unavailable{color:#ffb6c2}
+.product-detail-section{margin:0!important;padding:13px!important;border:1px solid #2b3d53!important;border-radius:15px!important;background:#172333!important}
+.product-detail-section h4{font-size:14px!important;display:flex;align-items:center;gap:7px;color:#e6efff!important;margin:0 0 9px!important}
+.product-detail-section h4 span{color:#8db8ff}
+.product-detail-section p{font-size:12px!important;line-height:1.85!important;color:#afbed2!important;white-space:pre-line;overflow-wrap:anywhere}
+.usage-steps{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.usage-steps li{display:grid;grid-template-columns:27px minmax(0,1fr);gap:9px;align-items:start;color:#c2cfe1;font-size:12px;line-height:1.8}
+.usage-step-number{width:26px;height:26px;border-radius:9px;background:#29476c;border:1px solid #436a9c;display:grid;place-items:center;color:#e3efff;font-weight:850;font-size:12px}
+.product-usage-empty{margin:0;color:#8f9fb6;font-size:12px;line-height:1.8}
+.product-details-actions{position:sticky;bottom:0;display:grid;grid-template-columns:1fr 1fr;gap:9px;padding-top:8px;background:#111a27}
+.product-details-actions button{min-height:46px;margin:0!important;border-radius:13px!important}
+.product-details-actions button:disabled{opacity:.5;cursor:not-allowed}
+.product-buy-usdt{background:linear-gradient(110deg,#183a60,#1a2a40)!important;border:1px solid #416d9c!important;color:#e2efff!important}
+.product-details-footnote{font-size:10px;line-height:1.6;text-align:center;color:#8395ae;margin:0}
+@media(max-width:380px){.product-showcase .product-art{height:116px!important}.product-showcase-name{font-size:13px!important;padding-inline:10px!important}.product-showcase-price{font-size:14px!important}.product-details-hero{grid-template-columns:86px minmax(0,1fr)}.product-details-art{height:92px}.product-details-heading h3{font-size:15px}.product-details-summary strong{font-size:14px}}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -308,7 +352,22 @@ function renderProducts(){
  const filtered=products.filter(p=>(activeCategory==="الكل"||p.cat===activeCategory)&&(!q||(p.name+" "+p.cat+" "+p.duration).toLowerCase().includes(q)));
  const grid=document.getElementById("productsGrid");
  if(!filtered.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:25px"><h3>ما لقينا المنتج</h3><p>جرّب كلمة بحث ثانية أو اختر فئة مختلفة.</p></div>';return}
- grid.innerHTML=filtered.map(p=>`<article class="product product-showcase"><div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div><h3 class="product-showcase-name">${escapeHtml(p.name)}</h3><div class="product-showcase-duration">${escapeHtml(p.duration||"")}</div><div class="product-showcase-instant">تسليم فوري</div><div class="product-showcase-footer"><button class="details-btn" onclick="showProduct('${p.id}')">↖ التفاصيل</button><div class="product-showcase-price">$${money(p.price)}</div></div></article>`).join("");
+ grid.innerHTML=filtered.map(p=>{
+  const stockKnown=Number.isFinite(Number(p.stock_count))&&p.stock_count!==null&&p.stock_count!=="";
+  const stockLabel=p.available===false?"غير متوفر":(stockKnown?(Number(p.stock_count)>0?"متوفر "+Number(p.stock_count)+" قطعة":"نفد المخزون"):"متوفر");
+  const disabled=p.available===false||(stockKnown&&Number(p.stock_count)<1);
+  return `<article class="product product-showcase ${disabled?"is-unavailable":""}">
+   <div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}
+    <span class="product-stock-badge ${disabled?"out":""}">${escapeHtml(stockLabel)}</span>
+   </div>
+   <h3 class="product-showcase-name">${escapeHtml(p.name)}</h3>
+   <div class="product-showcase-duration">${escapeHtml(p.duration||"منتج رقمي")}</div>
+   <div class="product-showcase-footer">
+    <button class="details-btn" onclick="showProduct('${escapeHtml(p.id)}')">التفاصيل <span aria-hidden="true">←</span></button>
+    <div class="product-showcase-price">${escapeHtml(p.currency||"USD")} ${money(p.price)}</div>
+   </div>
+  </article>`;
+ }).join("");
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setCategory(cat,el){activeCategory=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts()}
@@ -319,23 +378,43 @@ if(page==="orders")loadOrders();if(page==="account")updateStats();
  window.scrollTo({top:0,behavior:"smooth"});
  try{if(window.Telegram?.WebApp?.HapticFeedback)Telegram.WebApp.HapticFeedback.selectionChanged()}catch(e){}
 }
+function formatUsageSteps(value){
+ const raw=String(value||"").trim();
+ if(!raw)return '<p class="product-usage-empty">سيتم عرض تعليمات الاستخدام عند إضافتها إلى بيانات المنتج.</p>';
+ const lines=raw.split(/\\r?\\n|(?<=\\.)\\s+(?=\\d+[.)])/).map(x=>x.trim()).filter(Boolean);
+ return '<ol class="usage-steps">'+lines.map((line,i)=>{
+   const clean=line.replace(/^\\s*\\d+[.)、-]?\\s*/,"");
+   return '<li><span class="usage-step-number">'+(i+1)+'</span><span>'+escapeHtml(clean)+'</span></li>';
+ }).join("")+'</ol>';
+}
 function showProduct(id){
- const p=products.find(x=>x.id===id);if(!p)return;
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
  const modal=document.querySelector("#modalBackdrop .modal");
  modal?.classList.add("product-modal");
+ const stockKnown=p.stock_count!==null&&p.stock_count!==undefined&&p.stock_count!=="";
+ const stock=stockKnown?Math.max(0,Number(p.stock_count)):null;
+ const unavailable=p.available===false||(stock!==null&&stock<1);
+ const currency=String(p.currency||"USD").toUpperCase();
+ const note=p.important_notes||p.notice||"راجع شروط المنتج قبل الشراء. المنتجات الرقمية قد تختلف شروط استرجاعها حسب حالة التسليم والتفعيل.";
+ const usage=p.how_to_use||p.usage_instructions||p.usage||"";
  document.getElementById("modalTitle").textContent=p.name;
  document.getElementById("modalBody").innerHTML=`
-  <div class="product-details-compact">
-   <div class="product-art product-art-image" style="height:92px;margin-bottom:9px">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.remove()">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
-   <p class="subtext product-details-description">${escapeHtml(p.desc||"")}</p>
-   <div class="product-details-price"><span class="subtext">السعر</span><strong>${money(p.price)} <small>USD</small></strong></div>
-   <section class="product-detail-section"><h4>تنبيهات وملاحظات مهمة</h4><p>${escapeHtml(p.notice||p.important_notes||"يرجى مراجعة تفاصيل المنتج قبل إتمام الشراء.")}</p></section>
-   <section class="product-detail-section"><h4>طريقة الاستخدام</h4><div class="product-usage">${escapeHtml(p.how_to_use||p.usage_instructions||p.usage||"تعليمات الاستخدام الخاصة بهذا المنتج ستظهر هنا عند إضافتها إلى بياناته.")}</div></section>
-   
-   <div class="product-details-actions">
-    <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" onclick="requestPurchase('${p.id}')">شراء من الرصيد</button>
-    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" onclick="requestProductUsdt('${p.id}')">شراء الآن <span>USDT</span></button>
+  <div class="product-details-layout">
+   <div class="product-details-hero">
+    <div class="product-details-art">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
+    <div class="product-details-heading"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc||p.duration||"منتج رقمي")}</p></div>
    </div>
+   <div class="product-details-summary">
+    <div><small>السعر</small><strong>${escapeHtml(currency)} ${money(p.price)}</strong></div>
+    <div><small>التوفر</small><strong class="${unavailable?"stock-unavailable":"stock-available"}">${unavailable?"غير متوفر":(stock===null?"متوفر":stock+" قطعة")}</strong></div>
+   </div>
+   <section class="product-detail-section product-notice-section"><h4><span>ⓘ</span> ملاحظات وشروط مهمة</h4><p>${escapeHtml(note)}</p></section>
+   <section class="product-detail-section product-usage-section"><h4><span>✓</span> طريقة الاستخدام</h4>${formatUsageSteps(usage)}</section>
+   <div class="product-details-actions">
+    <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')">${unavailable?"غير متوفر":"شراء من الرصيد"}</button>
+    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')">شراء الآن <span>USDT</span></button>
+   </div>
+   <p class="product-details-footnote">يتم تأكيد توفر المنتج والسعر من الخادم عند إتمام الطلب.</p>
   </div>`;
  openModal();
 }
@@ -826,7 +905,11 @@ async function loadProducts(){
       icon: "spark",
       desc: String(p.description || ""),
       image: String(p.image_url || ""),
-      notice: String(p.notice || ""),
+      currency: String(p.currency || "USD"),
+      available: p.available !== false,
+      stock_count: p.stock_count ?? null,
+      notice: String(p.important_notes || p.notice || ""),
+      important_notes: String(p.important_notes || p.notice || ""),
       how_to_use: String(p.how_to_use || "")
     }));
     renderProducts();
