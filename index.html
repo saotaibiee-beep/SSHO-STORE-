@@ -308,8 +308,8 @@ svg{flex-shrink:0}
   </div>
   <div class="section-head"><h2>المساعدة والدعم</h2></div>
   <div class="settings">
-    <button class="setting setting-link" onclick="openInfo('الأسئلة الشائعة','يمكنك هنا لاحقاً الاطلاع على إجابات الأسئلة المتعلقة بالاشتراكات، الدفع، واستلام المنتجات.')"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.2-1.9 2.7M12 17h.01" stroke-linecap="round"/></svg></span><span class="setting-copy"><strong>الأسئلة الشائعة</strong><small>إجابات سريعة عن المتجر</small></span><span class="chev">‹</span></button>
-    <button class="setting setting-link" onclick="openInfo('الشروط والتعهد والخصوصية','يجب نشر الشروط والتعهد وسياسة الخصوصية النهائية قبل استقبال المدفوعات الحقيقية.')"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>الشروط والتعهد والخصوصية</strong><small>السياسات والحقوق</small></span><span class="chev">‹</span></button>
+    <button class="setting setting-link" onclick="openFAQ()"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M9.6 9a2.5 2.5 0 1 1 4.3 1.8c-1.1 1-1.9 1.2-1.9 2.7M12 17h.01" stroke-linecap="round"/></svg></span><span class="setting-copy"><strong>الأسئلة الشائعة</strong><small>إجابات سريعة عن المتجر</small></span><span class="chev">‹</span></button>
+    <button class="setting setting-link" onclick="openTerms()"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>الشروط والتعهد والخصوصية</strong><small>السياسات والحقوق</small></span><span class="chev">‹</span></button>
     <button class="setting setting-link" onclick="contactSupport()"><span class="setting-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="setting-copy"><strong>التواصل مع الدعم</strong><small>نحن هنا لمساعدتك</small></span><span class="chev">‹</span></button>
   </div>
   <div id="adminTools" style="display:none">
@@ -872,10 +872,60 @@ function openModal(){document.getElementById("modalBackdrop").classList.add("ope
 function closeModal(){document.getElementById("modalBackdrop").classList.remove("open");document.body.style.overflow=""}
 function openInfo(title,html){document.getElementById("modalTitle").textContent=title;document.getElementById("modalBody").innerHTML=`<div class="subtext" style="font-size:12px;line-height:2">${html}</div><button class="secondary wide" onclick="closeModal()">إغلاق</button>`;openModal()}
 function openNotifications(){openInfo("الإشعارات","ما عندك إشعارات جديدة حالياً.<br><br>سيتم عرض تحديثات الطلبات والعروض بعد ربط نظام الإشعارات بالخادم والبوت.")}
+function openFAQ(){
+ const items=[
+ ["كيف أشحن رصيدي؟","افتح تبويب «المحفظة»، واختر طريقة الشحن المتاحة: Binance ID أو تحويل USDT عبر الشبكة المحددة أو بطاقة Red Packet. اتبع التعليمات الظاهرة للطلب، وأدخل بيانات التحويل الصحيحة. لا ترسل بيانات الدخول أو رموز التحقق."],
+ ["كيف أستلم طلبي بعد الشراء؟","افتح تبويب «طلباتي» ثم اختر الطلب لعرض حالته وتفاصيله. تظهر بيانات التسليم داخل تفاصيل الطلب بعد تأكيد الدفع وتجهيز المنتج."],
+ ["كم تستغرق مدة التسليم؟","تعتمد المدة على نوع المنتج وطريقة الدفع. قد يتم التسليم تلقائياً بعد تأكيد الدفع، أو يحتاج الطلب إلى مراجعة يدوية. حالة الطلب في «طلباتي» هي المرجع الأحدث."],
+ ["ماذا أفعل إذا لم يصل الرصيد؟","لا تكرر التحويل ولا تنشئ طلب شحن مكرراً. احتفظ بإثبات العملية ورقم الطلب أو TxID، ثم افتح «تواصل مع الدعم» وأرسل التفاصيل اللازمة."],
+ ["هل يمكنني تغيير أو إلغاء الطلب؟","راجع تفاصيل المنتج والشروط قبل الدفع. المنتجات الرقمية قد لا يمكن إلغاؤها أو استبدالها بعد إتمام الشراء أو بدء التسليم، وفقاً للشروط المعروضة وقت الشراء."],
+ ["كيف أتابع طلب الدعم؟","من صفحة حسابي افتح «التواصل مع الدعم»، اختر موضوع المشكلة، واكتب رقم الطلب ووصفاً مختصراً. لا ترسل كلمات المرور أو رموز التحقق."],
+ ["هل أشارك كلمة المرور أو رمز التحقق مع الدعم؟","لا. لن نطلب كلمة مرور Telegram أو Binance أو Google أو رموز المصادقة. شارك رقم الطلب وإثبات الدفع فقط عند الحاجة."]
+ ];
+ document.getElementById("modalTitle").textContent="الأسئلة الشائعة";
+ document.getElementById("modalBody").innerHTML='<div class="subtext" style="line-height:1.9;margin-bottom:18px">إجابات سريعة وواضحة حول الشحن والطلبات والتسليم والدعم.</div>'+items.map((x,i)=>'<details style="border:1px solid var(--border,#29364a);background:rgba(18,31,47,.72);border-radius:18px;padding:15px;margin:10px 0"><summary style="cursor:pointer;font-weight:800;line-height:1.7">'+x[0]+'</summary><div style="color:var(--muted,#a8b2c5);line-height:1.95;margin-top:12px">'+x[1]+'</div></details>').join('')+'<button class="primary wide" onclick="contactSupport()">لم تجد إجابتك؟ تواصل مع الدعم</button><button class="secondary wide" style="margin-top:10px" onclick="closeModal()">إغلاق</button>';
+ openModal();
+}
+function openTerms(){
+ const commitment='يقر المشتري ويعلم تماماً أن جميع المنتجات المعروضة في المتجر هي **منتجات رقمية وليست عينية**، ولذلك **لا يمكن إلغاء الطلب، أو استرجاع الأموال، أو استبدال المنتج** نهائياً بعد إتمام عملية الشراء أو شحن وتسهيل تسليم المنتج للعميل، بغض النظر عما إذا تم تفعيله أو استخدامه أم لا.';
+ document.getElementById("modalTitle").textContent="الشروط والتعهد والخصوصية";
+ document.getElementById("modalBody").innerHTML=
+ '<div style="display:grid;gap:14px;line-height:1.95">'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">1. طبيعة المنتجات والتعهد الإلزامي</h3><p style="color:var(--muted,#a8b2c5)">جميع المنتجات المعروضة منتجات رقمية، وقد تكون أكواداً أو روابط تفعيل أو حسابات أو بيانات تسليم بحسب وصف كل منتج. يجب قراءة الوصف والمنطقة والمدة وطريقة التسليم قبل الدفع.</p><div style="margin-top:12px;padding:14px;border:1px solid rgba(239,91,115,.4);border-radius:14px;background:rgba(239,91,115,.08);font-weight:800">'+commitment+'</div></section>'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">2. الدفع وتسليم الطلب</h3><p style="color:var(--muted,#a8b2c5)">تُعالج الطلبات بعد التحقق من الدفع. يجب اختيار شبكة USDT الصحيحة ومراجعة العنوان والرسوم قبل الإرسال. لا يُعد إرسال إثبات الدفع وحده تأكيداً نهائياً حتى تكتمل المراجعة وتُحدّث حالة الطلب.</p></section>'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">3. الاستخدام والمسؤولية</h3><p style="color:var(--muted,#a8b2c5)">يتعهد المشتري باستخدام المنتجات وفق شروط مزود الخدمة والقوانين المعمول بها. لا تشارك بيانات التسليم أو الأكواد مع الآخرين، وتحقق من توافق المنتج مع احتياجك قبل الشراء. تختلف صلاحية المنتج وقيوده بحسب وصفه.</p></section>'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">4. الخصوصية والبيانات</h3><p style="color:var(--muted,#a8b2c5)">قد تتم معالجة معرّف Telegram وبيانات الطلب والدفع وسجل الدعم الضرورية لتنفيذ الطلبات، ومنع التكرار والاحتيال، وتقديم المساعدة. لا ترسل كلمات المرور أو مفاتيح المحافظ أو رموز المصادقة. تُحفظ السجلات اللازمة للتشغيل والمحاسبة والأمان وتُتاح فقط للمصرح لهم بحسب الحاجة.</p></section>'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">5. الدعم والشكاوى</h3><p style="color:var(--muted,#a8b2c5)">عند وجود مشكلة، تواصل مع الدعم برقم الطلب ووصف المشكلة وإثبات الدفع عند الحاجة. لا تكرر التحويل أو إرسال كود البطاقة قبل مراجعة حالة الطلب.</p></section>'+
+ '<section class="card" style="padding:16px"><h3 style="font-weight:900;margin-bottom:8px">6. تحديث الشروط</h3><p style="color:var(--muted,#a8b2c5)">قد تُحدّث هذه الشروط عند الحاجة. يُرجى مراجعتها قبل كل عملية شراء. لا يحد هذا النص من أي حقوق إلزامية للمستهلك لا يجوز التنازل عنها بموجب القانون المعمول به.</p></section>'+
+ '</div><button class="secondary wide" style="margin-top:16px" onclick="closeModal()">إغلاق</button>';
+ openModal();
+}
 function contactSupport(){
  const username=window.SSHO_SUPPORT_USERNAME||"";
- if(username){const url="https://t.me/"+username.replace(/^@/,"");if(window.Telegram?.WebApp?.openTelegramLink)Telegram.WebApp.openTelegramLink(url);else window.open(url,"_blank");}
- else openInfo("التواصل مع الدعم","أضف اسم مستخدم الدعم في متغير SSHO_SUPPORT_USERNAME داخل الكود، أو اربط زر الدعم بعنوان الدعم المعتمد.")
+ document.getElementById("modalTitle").textContent="تواصل مع الدعم";
+ document.getElementById("modalBody").innerHTML=
+ '<div class="subtext" style="line-height:1.9;margin-bottom:18px">اختر موضوع رسالتك وأضف رقم الطلب إن وجد. لا ترسل كلمات المرور أو رموز التحقق.</div>'+
+ '<div style="display:grid;gap:10px;margin-bottom:16px">'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تحويلت Binance ولم يصل الرصيد" checked> <span><b>حوّلت عبر Binance ولم يصل الرصيد</b><br><small class="subtext">رقم الطلب أو بيانات التحويل</small></span></label>'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تحويل USDT عبر الشبكة"> <span><b>تحويل USDT عبر الشبكة</b><br><small class="subtext">أرفق TxID عند التواصل</small></span></label>'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="بطاقة Red Packet"> <span><b>بطاقة Red Packet</b><br><small class="subtext">مشكلة في الكود أو الشحن</small></span></label>'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تفعيل أو استلام منتج"> <span><b>مشكلة تفعيل أو استلام</b><br><small class="subtext">اذكر اسم المنتج ورقم الطلب</small></span></label>'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="سؤال عام"> <span><b>سؤال عام</b></span></label></div>'+
+ '<label style="display:block;font-weight:800;margin-bottom:7px" for="supportOrderRef">رقم الطلب (اختياري)</label><input id="supportOrderRef" class="field" placeholder="مثال: SS-..." maxlength="80" style="width:100%;margin-bottom:12px">'+
+ '<label style="display:block;font-weight:800;margin-bottom:7px" for="supportMessage">تفاصيل المشكلة</label><textarea id="supportMessage" class="field" maxlength="1200" rows="4" placeholder="اكتب المشكلة باختصار..." style="width:100%;resize:vertical"></textarea>'+
+ '<button class="primary wide" style="margin-top:14px" onclick="sendSupportRequest()">متابعة التواصل</button>'+
+ '<button class="secondary wide" style="margin-top:10px" onclick="closeModal()">إغلاق</button>';
+ openModal();
+}
+function sendSupportRequest(){
+ const topic=document.querySelector('input[name="supportTopic"]:checked')?.value||"سؤال عام";
+ const order=(document.getElementById("supportOrderRef")?.value||"").trim();
+ const message=(document.getElementById("supportMessage")?.value||"").trim();
+ const body="الموضوع: "+topic+"\\nرقم الطلب: "+(order||"غير متوفر")+"\\nالتفاصيل: "+(message||"لم تتم إضافة تفاصيل");
+ const username=window.SSHO_SUPPORT_USERNAME||"";
+ if(username){const url="https://t.me/"+username.replace(/^@/,"")+"?text="+encodeURIComponent(body);if(window.Telegram?.WebApp?.openTelegramLink)Telegram.WebApp.openTelegramLink(url);else window.open(url,"_blank");return;}
+ if(navigator.clipboard?.writeText){navigator.clipboard.writeText(body).then(()=>showToast("تم نسخ رسالة الدعم. أرسلها عبر قناة دعم المتجر."),()=>showToast("تعذر النسخ؛ انسخ تفاصيل الطلب يدوياً."));}
+ else showToast("يرجى نسخ تفاصيل الطلب والتواصل عبر قناة دعم المتجر.");
 }
 function showToast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
 function updateStats(){document.getElementById("ordersCount").textContent=orders.length;document.getElementById("purchasesCount").textContent=orders.filter(o=>o.status==="completed").length}
