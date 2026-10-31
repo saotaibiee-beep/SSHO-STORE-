@@ -26,7 +26,15 @@ export default async function handler(req, res) {
 
     if (!response.ok) return res.status(502).json({ error: "Could not load products", details: await response.text() });
 
-    const products = await response.json();
+    const products = (await response.json()).map((p) => {
+      if (p.slug === "youtube-premium-individual-3-months") {
+        return {
+          ...p,
+          notice: "تنبيه مهم: المنتج حساب جاهز وليس كود تفعيل، ولا يُستخدم لتفعيل الاشتراك على حسابك الحالي.\\nالنوع: حساب جاهز.\\nالمدة: 3 أشهر.\\nالمنطقة: عالمية (GLOBAL).\\nالتسليم: بيانات الحساب بعد إتمام الطلب."
+        };
+      }
+      return p;
+    });
     return res.status(200).json({ products });
   } catch {
     return res.status(500).json({
