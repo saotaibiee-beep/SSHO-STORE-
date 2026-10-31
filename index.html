@@ -220,7 +220,7 @@ svg{flex-shrink:0}
 .product-details-summary>div{border:1px solid #2a3b51;border-radius:14px;background:#172435;padding:12px}
 .product-details-summary small{display:block;font-size:11px;color:#9eafc7;margin-bottom:6px}
 .product-details-summary strong{font-size:16px;line-height:1.4;color:#edf4ff;overflow-wrap:anywhere}
-.product-details-summary .stock-available{color:#91e0c2}.product-details-summary .stock-unavailable{color:#ffb6c2}
+.product-details-summary .stock-available{color:#60a5fa}.product-details-summary .stock-unavailable{color:#ffb6c2}
 .product-detail-section{margin:0!important;padding:13px!important;border:1px solid #2b3d53!important;border-radius:15px!important;background:#172333!important}
 .product-detail-section h4{font-size:14px!important;display:flex;align-items:center;gap:7px;color:#e6efff!important;margin:0 0 9px!important}
 .product-detail-section h4 span{color:#8db8ff}
@@ -358,7 +358,7 @@ function renderProducts(){
   const disabled=p.available===false||(stockKnown&&Number(p.stock_count)<1);
   return `<article class="product product-showcase ${disabled?"is-unavailable":""}">
    <div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}
-    <span class="product-stock-badge ${disabled?"out":""}">${escapeHtml(stockLabel)}</span>
+    
    </div>
    <h3 class="product-showcase-name">${escapeHtml(p.name)}</h3>
    <div class="product-showcase-duration">${escapeHtml(p.duration||"منتج رقمي")}</div>
@@ -874,9 +874,9 @@ function openInfo(title,html){document.getElementById("modalTitle").textContent=
 function openNotifications(){openInfo("الإشعارات","ما عندك إشعارات جديدة حالياً.<br><br>سيتم عرض تحديثات الطلبات والعروض بعد ربط نظام الإشعارات بالخادم والبوت.")}
 function openFAQ(){
  const items=[
- ["كيف أشحن رصيدي؟","افتح تبويب «المحفظة»، واختر طريقة الشحن المتاحة: Binance ID أو تحويل USDT عبر الشبكة المحددة أو بطاقة Red Packet. اتبع التعليمات الظاهرة للطلب، وأدخل بيانات التحويل الصحيحة. لا ترسل بيانات الدخول أو رموز التحقق."],
+ ["كيف أشحن رصيدي؟","افتح تبويب «المحفظة»، واختر طريقة الشحن المتاحة: Binance ID أو تحويل USDT عبر الشبكة المحددة أو binance gift card. اتبع التعليمات الظاهرة للطلب، وأدخل بيانات التحويل الصحيحة. لا ترسل بيانات الدخول أو رموز التحقق."],
  ["كيف أستلم طلبي بعد الشراء؟","افتح تبويب «طلباتي» ثم اختر الطلب لعرض حالته وتفاصيله. تظهر بيانات التسليم داخل تفاصيل الطلب بعد تأكيد الدفع وتجهيز المنتج."],
- ["كم تستغرق مدة التسليم؟","تعتمد المدة على نوع المنتج وطريقة الدفع. قد يتم التسليم تلقائياً بعد تأكيد الدفع، أو يحتاج الطلب إلى مراجعة يدوية. حالة الطلب في «طلباتي» هي المرجع الأحدث."],
+ ["كم تستغرق مدة التسليم؟","يتم تسليمها تلقائياً بعد تأكيد الدفع، تحتاج بعض الطلبات إلى مراجعة يدوية. حالة الطلب في «طلباتي» هي المرجع الأحدث."],
  ["ماذا أفعل إذا لم يصل الرصيد؟","لا تكرر التحويل ولا تنشئ طلب شحن مكرراً. احتفظ بإثبات العملية ورقم الطلب أو TxID، ثم افتح «تواصل مع الدعم» وأرسل التفاصيل اللازمة."],
  ["هل يمكنني تغيير أو إلغاء الطلب؟","راجع تفاصيل المنتج والشروط قبل الدفع. المنتجات الرقمية قد لا يمكن إلغاؤها أو استبدالها بعد إتمام الشراء أو بدء التسليم، وفقاً للشروط المعروضة وقت الشراء."],
  ["كيف أتابع طلب الدعم؟","من صفحة حسابي افتح «التواصل مع الدعم»، اختر موضوع المشكلة، واكتب رقم الطلب ووصفاً مختصراً. لا ترسل كلمات المرور أو رموز التحقق."],
@@ -908,7 +908,7 @@ function contactSupport(){
  '<div style="display:grid;gap:10px;margin-bottom:16px">'+
  '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تحويلت Binance ولم يصل الرصيد" checked> <span><b>حوّلت عبر Binance ولم يصل الرصيد</b><br><small class="subtext">رقم الطلب أو بيانات التحويل</small></span></label>'+
  '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تحويل USDT عبر الشبكة"> <span><b>تحويل USDT عبر الشبكة</b><br><small class="subtext">أرفق TxID عند التواصل</small></span></label>'+
- '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="بطاقة Red Packet"> <span><b>بطاقة Red Packet</b><br><small class="subtext">مشكلة في الكود أو الشحن</small></span></label>'+
+ '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="binance gift card"> <span><b>binance gift card</b><br><small class="subtext">مشكلة في الكود أو الشحن</small></span></label>'+
  '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="تفعيل أو استلام منتج"> <span><b>مشكلة تفعيل أو استلام</b><br><small class="subtext">اذكر اسم المنتج ورقم الطلب</small></span></label>'+
  '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="سؤال عام"> <span><b>سؤال عام</b></span></label></div>'+
  '<label style="display:block;font-weight:800;margin-bottom:7px" for="supportOrderRef">رقم الطلب (اختياري)</label><input id="supportOrderRef" class="field" placeholder="مثال: SS-..." maxlength="80" style="width:100%;margin-bottom:12px">'+
