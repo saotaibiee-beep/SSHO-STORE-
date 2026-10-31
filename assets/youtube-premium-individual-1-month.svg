@@ -1,12 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="YouTube Premium - شهر واحد">
-<rect width="1200" height="700" fill="#ffffff"/>
-<path d="M0 535 H1200" stroke="#eef0f7" stroke-width="2"/>
-<path d="M0 555 H1200" stroke="#e9e7f8" stroke-width="2"/>
-<path d="M70 80 H220" stroke="#7c6cff" stroke-width="5" stroke-linecap="round"/>
-<path d="M980 80 H1130" stroke="#7c6cff" stroke-width="5" stroke-linecap="round"/>
-<circle cx="95" cy="605" r="5" fill="#7c6cff" opacity=".45"/><circle cx="1105" cy="605" r="5" fill="#7c6cff" opacity=".45"/>
-<rect x="430" y="145" width="105" height="74" rx="22" fill="#ff0033"/><path d="M472 163 L472 201 L505 182Z" fill="#ffffff"/><text x="552" y="202" font-family="Arial,sans-serif" font-size="66" font-weight="700" fill="#282828">YouTube</text><text x="600" y="278" text-anchor="middle" font-family="Arial,sans-serif" font-size="58" font-weight="700" fill="#282828">Premium</text>
-<text x="600" y="430" text-anchor="middle" font-family="Arial,sans-serif" font-size="54" font-weight="700" fill="#ff0033">YouTube Premium</text>
-<rect x="400" y="475" width="400" height="74" rx="37" fill="#ffffff" stroke="#dcd8f5" stroke-width="2"/>
-<text x="600" y="523" text-anchor="middle" font-family="Arial,sans-serif" font-size="34" font-weight="600" fill="#343044">شهر واحد</text>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700"><rect width="1200" height="700" fill="#ffffff"/><path d="M0 0H1200V18H0Z" fill="#ff0033"/><circle cx="600" cy="245" r="105" fill="#ff0033" fill-opacity=".10"/><text x="600" y="290" text-anchor="middle" font-family="Arial,sans-serif" font-size="150" font-weight="700" fill="#ff0033">▶</text><text x="600" y="430" text-anchor="middle" font-family="Arial,sans-serif" font-size="68" font-weight="700" fill="#172033">YouTube Premium</text><text x="600" y="510" text-anchor="middle" font-family="Arial,sans-serif" font-size="38" font-weight="600" fill="#ff0033">1 MONTH • شهر واحد</text></svg>
