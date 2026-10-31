@@ -236,6 +236,14 @@ svg{flex-shrink:0}
 .product-details-footnote{font-size:10px;line-height:1.6;text-align:center;color:#8395ae;margin:0}
 @media(max-width:380px){.product-showcase .product-art{height:116px!important}.product-showcase-name{font-size:13px!important;padding-inline:10px!important}.product-showcase-price{font-size:14px!important}.product-details-hero{grid-template-columns:86px minmax(0,1fr)}.product-details-art{height:92px}.product-details-heading h3{font-size:15px}.product-details-summary strong{font-size:14px}}
 
+
+/* Minimal product cards: product name and duration only */
+.product-card-minimal{cursor:pointer;outline-offset:3px}
+.product-card-minimal:focus-visible{outline:2px solid #8b7bff}
+.product-card-minimal .product-showcase-name{margin-bottom:0}
+.product-card-minimal .product-showcase-duration{margin-top:5px;margin-bottom:14px}
+.product-card-minimal .product-showcase-footer,.product-card-minimal .product-showcase-price,.product-card-minimal .details-btn{display:none!important}
+
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -356,16 +364,10 @@ function renderProducts(){
   const stockKnown=Number.isFinite(Number(p.stock_count))&&p.stock_count!==null&&p.stock_count!=="";
   const stockLabel=p.available===false?"غير متوفر":(stockKnown?(Number(p.stock_count)>0?"متوفر "+Number(p.stock_count)+" قطعة":"نفد المخزون"):"متوفر");
   const disabled=p.available===false||(stockKnown&&Number(p.stock_count)<1);
-  return `<article class="product product-showcase ${disabled?"is-unavailable":""}">
-   <div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}
-    
-   </div>
+  return `<article class="product product-showcase product-card-minimal ${disabled?"is-unavailable":""}" role="button" tabindex="0" aria-label="تفاصيل ${escapeHtml(p.name)}" onclick="showProduct('${escapeHtml(p.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProduct('${escapeHtml(p.id)}')}">
+   <div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
    <h3 class="product-showcase-name">${escapeHtml(p.name)}</h3>
    <div class="product-showcase-duration">${escapeHtml(p.duration||"منتج رقمي")}</div>
-   <div class="product-showcase-footer">
-    <button class="details-btn" onclick="showProduct('${escapeHtml(p.id)}')">التفاصيل <span aria-hidden="true">←</span></button>
-    <div class="product-showcase-price">${escapeHtml(p.currency||"USD")} ${money(p.price)}</div>
-   </div>
   </article>`;
  }).join("");
 }
