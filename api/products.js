@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return res.status(500).json({ error: "Supabase configuration is missing" });
   try {
-    const response = await fetch(`${url.replace(/\\/+$/, "")}/rest/v1/products?select=id,slug,name,description,important_notes,how_to_use,image_url,price,currency,category,available,active,stock_count&active=eq.true&available=eq.true`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
+    const response = await fetch(`${url.replace(/\/+$/, "")}/rest/v1/products?select=id,slug,name,description,important_notes,how_to_use,image_url,price,currency,category,available,active,stock_count&active=eq.true&available=eq.true`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
     if (!response.ok) return res.status(502).json({ error: "Could not load products", details: await response.text() });
     const products = (await response.json()).map((p) => {
       if (p.slug === "youtube-premium-individual-3-months" || p.slug === "youtube-premium-individual-1-month") {
