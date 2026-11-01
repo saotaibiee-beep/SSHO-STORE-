@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 280" role="img" aria-labelledby="title">
 <title id="title">SSHO STORE</title>
-<rect width="760" height="280" rx="24" fill="#fff"/>
+
 <g transform="translate(26 15)">
 <path d="M210 12H128C72 12 28 52 28 103c0 35 22 58 58 67l91 17-19 39H55L18 268h112c62 0 106-40 106-92 0-38-24-60-68-69l-83-16 18-34h89z" fill="#087cf0" transform="translate(0 -7) scale(.88)"/>
 <path d="M205 117 132 157 182 169 196 217 238 137 205 117Z" fill="#fff" stroke="#111827" stroke-width="4" stroke-linejoin="round" transform="translate(-5 -2)"/>
