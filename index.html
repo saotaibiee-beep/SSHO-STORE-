@@ -260,14 +260,13 @@ svg{flex-shrink:0}
 @media(max-width:380px){.product-showcase .product-art{height:116px!important}.product-showcase-name{font-size:13px!important;padding-inline:10px!important}.product-showcase-price{font-size:14px!important}.product-details-hero{grid-template-columns:86px minmax(0,1fr)}.product-details-art{height:92px}.product-details-heading h3{font-size:15px}.product-details-summary strong{font-size:14px}}
 
 
-/* Minimal product cards: product name and duration only */
-.product-card-minimal{cursor:pointer;outline-offset:3px}
+/* Minimal product cards: image, name, duration, and visible price */
+.product-card-minimal{cursor:pointer;outline-offset:3px;display:flex;flex-direction:column;overflow:hidden}
 .product-card-minimal:focus-visible{outline:2px solid #8b7bff}
 .product-card-minimal .product-showcase-name{margin-bottom:0}
-.product-card-minimal .product-showcase-duration{margin-top:5px;margin-bottom:14px}
-.product-card-minimal .product-showcase-footer,.product-card-minimal .product-showcase-price,.product-card-minimal .details-btn{display:none!important}
-
-
+.product-card-minimal .product-showcase-duration{margin-top:5px;margin-bottom:0}
+.product-card-minimal .product-showcase-footer,.product-card-minimal .details-btn{display:none!important}
+.product-card-minimal .product-showcase-price{display:block!important;visibility:visible!important;opacity:1!important;position:relative!important;z-index:2;margin-top:auto;padding:13px 12px 16px!important;min-height:48px;box-sizing:border-box;color:#7dd3fc!important;font-size:clamp(17px,4.8vw,23px)!important;font-weight:950!important;text-align:center;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
 /* Telegram WebView interaction safety */
 .modal-backdrop:not(.open){pointer-events:none!important;visibility:hidden}
 .modal-backdrop.open{pointer-events:auto}
@@ -295,6 +294,11 @@ svg{flex-shrink:0}
 }
 </style>
 
+<style id="ssho-force-visible-product-prices">
+/* Final override: ensure the price remains visible in Telegram's mobile WebView. */
+#productsGrid .product-card-minimal .product-showcase-price{display:block!important;visibility:visible!important;opacity:1!important;height:auto!important;min-height:48px!important;overflow:visible!important;color:#7dd3fc!important;background:transparent!important}
+#productsGrid .product-card-minimal .product-showcase-footer{display:none!important}
+</style>
 </head>
 <body>
 <div class="app" id="app">
