@@ -730,7 +730,7 @@ async function createDepositRequest(){
          '<div class="deposit-address-card"><div class="deposit-address-content"><div class="deposit-summary-label">عنوان المحفظة</div><div class="deposit-address-text" dir="ltr" id="depositAddressText">'+escapeHtml(address)+'</div></div></div>'+
          '<button type="button" class="deposit-copy" id="depositCopyButton" onclick="copyDepositAddress(this.dataset.address)" data-address="'+escapeHtml(address)+'">▢　نسخ عنوان المحفظة</button>'+
        '</div>'+
-       '<div class="deposit-warning">تأكد من أن عنوان المحفظة يدعم نوع الشبكة USDT قبل التحويل. لا ترسل عبارة الاسترداد أو المفتاح الخاص.</div>'+
+       '<div class="deposit-warning">تأكد من استخدام شبكة <b>'+escapeHtml(network.short)+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.</div>'+
        (selectedMethod==="USDT BEP20"
          ? '<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+Number(d.depositId)+')">تحقق من المعاملة</button></div>'
          : '')+
@@ -1082,7 +1082,7 @@ function openSellGiftCards(){
  <label>كود / رقم البطاقة <input name="card_code" required minlength="4" maxlength="300" autocomplete="off" placeholder="أدخل كود البطاقة"></label>
  <div class="sell-card-row"><label>القيمة الاسمية <input name="face_value" type="number" min="0.01" max="1000000" step="0.01" required placeholder="مثال: 50"></label><label>العملة <select name="currency"><option>USD</option><option>SAR</option><option>EUR</option><option>GBP</option></select></label></div>
  <label>عنوان محفظة USDT الخاصة بك <input name="usdt_wallet_address" required minlength="20" maxlength="160" autocomplete="off" placeholder="عنوان الاستلام — تحقق من الشبكة بنفسك"></label>
- <p class="muted">تأكد من أن عنوان المحفظة يدعم شبكة USDT التي ستُحددها الإدارة قبل التحويل. لا ترسل عبارة الاسترداد أو المفتاح الخاص.</p>
+ <p class="muted">تأكد من أن عنوان المحفظة يدعم نوع الشبكة USDT قبل التحويل. لا ترسل عبارة الاسترداد أو المفتاح الخاص.</p>
  <button class="primary" type="submit" id="sellCardSubmit">إرسال للمراجعة اليدوية</button><div id="sellCardMessage" role="status" aria-live="polite"></div></form>`;
  document.getElementById("modalTitle").textContent="بيع البطاقات الرقمية";
  document.getElementById("modalBody").innerHTML=body;
