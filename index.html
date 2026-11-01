@@ -269,7 +269,8 @@ function renderProducts(){
  if(!filtered.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:25px"><h3>ما لقينا المنتج</h3><p>جرّب كلمة بحث ثانية أو اختر فئة مختلفة.</p></div>';return}
  grid.innerHTML=filtered.map(p=>{const imageUrl=safeProductImageUrl(p.imageUrl);const image=imageUrl?("<img src=\""+escapeHtml(imageUrl)+"\" alt=\""+escapeHtml(p.name)+"\" loading=\"lazy\" referrerpolicy=\"no-referrer\">"):(iconSvgs[p.icon]||iconSvgs.spark);return "<article class=\"product\"><div class=\"product-art "+(imageUrl?"has-image":"")+"\">"+image+"</div><h3 title=\""+escapeHtml(p.name)+"\">"+escapeHtml(p.name)+"</h3><div class=\"duration\">"+escapeHtml(p.duration||"—")+"</div><div class=\"price-row\"><div class=\"price\">$"+money(p.price)+" <small>USD</small></div></div></article>"}).join("");
 }
-function safeProductImageUrl(value){try{const u=new URL(String(value||""),window.location.origin);return ["https:","http:"].includes(u.protocol)?u.href:""}catch(e){return ""}}\nfunction escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function safeProductImageUrl(value){try{const u=new URL(String(value||""),window.location.origin);return ["https:","http:"].includes(u.protocol)?u.href:""}catch(e){return ""}}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function setCategory(cat,el){activeCategory=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts()}
 function go(page){
  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
@@ -710,6 +711,7 @@ async function loadProducts(){
       cat: String(p.category || "عام"),
       duration: String(p.description || ""),
       price: Number(p.price || 0),
+      imageUrl: String(p.image_url || p.imageUrl || ""),
       icon: "spark",
       desc: String(p.description || "")
     }));
