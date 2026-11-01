@@ -1068,11 +1068,11 @@ function bootSSHOStore(){
   try { renderOrders(); } catch(e) { console.warn("Orders initial render failed",e); }
   try { checkAdminAccess(); } catch(e) { console.warn("Admin check failed",e); }
 }
-if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootSSHOStore, { once: true });
-else bootSSHOStore();
-renderOrders();
-applyTelegramUser();
-checkAdminAccess();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", bootSSHOStore, { once: true });
+} else {
+  bootSSHOStore();
+}
 </script>
 <script>
 (function serverWalletBalanceSync(){
