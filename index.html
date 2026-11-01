@@ -261,6 +261,11 @@ svg{flex-shrink:0}
 .product-card-minimal .product-showcase-duration{margin-top:5px;margin-bottom:14px}
 .product-card-minimal .product-showcase-footer,.product-card-minimal .product-showcase-price,.product-card-minimal .details-btn{display:none!important}
 
+
+/* Telegram WebView interaction safety */
+.modal-backdrop:not(.open){pointer-events:none!important;visibility:hidden}
+.modal-backdrop.open{pointer-events:auto}
+.product,.product-showcase,.product button,.bottom-nav,.nav-item{pointer-events:auto;touch-action:manipulation}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
 </head>
@@ -357,10 +362,6 @@ svg{flex-shrink:0}
 <div class="toast" id="toast"></div>
 
 <script>
-/* Prevent accidental full-screen overlays from intercepting store taps. */
-.modal-backdrop:not(.open){pointer-events:none!important;visibility:hidden}
-.modal-backdrop.open{pointer-events:auto}
-.product,.product-showcase,.product button,.bottom-nav,.nav-item{pointer-events:auto;touch-action:manipulation}
 /* SSHO STORE front-end starter.
    Production: set API_BASE to your HTTPS backend, verify Telegram initData server-side,
    and never put bot tokens, database service-role keys, or payment secrets in this file. */
