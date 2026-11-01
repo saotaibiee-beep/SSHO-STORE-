@@ -32,7 +32,7 @@ async function loadGift(){const box=$("giftList");box.innerHTML='<div class="emp
 async function loadProducts(){
  const box=$("productsList");box.innerHTML='<div class="empty">جارٍ تحميل المنتجات…</div>';
  try{
-  const d=await api("/api/admin/products");const rows=d.products||[];
+  const d=await api("/api/admin/deposits?resource=products");const rows=d.products||[];
   if(!rows.length){box.innerHTML='<div class="empty">لا توجد منتجات.</div>';return}
   box.innerHTML=rows.map(p=>'<article class="card" data-product-card="'+esc(p.id)+'"><div class="row"><div><strong>'+esc(p.name)+'</strong><div class="muted">'+esc(p.category||"عام")+' · '+esc(p.price)+' '+esc(p.currency||"USD")+' · '+(p.active?'نشط':'غير نشط')+'</div></div><span class="muted">'+(p.available?'متاح':'غير متاح')+'</span></div><div class="row" style="justify-content:flex-start;margin:12px 0"><img data-product-preview="'+esc(p.id)+'" src="'+esc(p.image_url||"")+'" alt="" style="width:86px;height:86px;object-fit:contain;border-radius:12px;background:#0e0c17;border:1px solid var(--line);'+(p.image_url?'':'display:none')+'"><span class="muted" data-image-empty="'+esc(p.id)+'" '+(p.image_url?'style="display:none"':'')+'>لا توجد صورة حالياً</span></div><label class="muted" for="product-file-'+esc(p.id)+'">اختر صورة من الجهاز</label><input id="product-file-'+esc(p.id)+'" data-product-file="'+esc(p.id)+'" type="file" accept="image/jpeg,image/png,image/webp,image/gif" style="display:block;width:100%;margin:8px 0;color:var(--muted)"><div class="actions"><button type="button" class="primary" data-upload-product="'+esc(p.id)+'">رفع الصورة وحفظها</button></div><div class="status" data-upload-status="'+esc(p.id)+'"></div></article>').join("");
  }catch(e){box.innerHTML='<div class="error">'+esc(e.message)+'</div>'}
@@ -47,7 +47,7 @@ async function uploadProductImage(id){
  if(status)status.textContent="جارٍ رفع الصورة…";
  try{
   const fileBase64=await readFileBase64(file);
-  const result=await api("/api/admin/products","POST",{productId:id,mimeType:file.type,fileBase64});
+  const result=await api("/api/admin/deposits?resource=products","POST",{productId:id,mimeType:file.type,fileBase64});
   const preview=document.querySelector('[data-product-preview="'+CSS.escape(id)+'"]');
   if(preview){preview.src=result.image_url;preview.style.display="block"}
   const empty=document.querySelector('[data-image-empty="'+CSS.escape(id)+'"]');if(empty)empty.style.display="none";
