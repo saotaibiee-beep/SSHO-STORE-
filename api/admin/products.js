@@ -12,7 +12,7 @@ const MIME = {
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
-  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\\/+$/, "");
+  const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/+$/, "");
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!botToken || !supabaseUrl || !serviceKey) return res.status(503).json({ error: "Server configuration incomplete" });
 
