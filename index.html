@@ -942,7 +942,20 @@ function applyTelegramUser(){
  catch(e){}
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
-async function loadProducts(){
+async function getProductDuration(product){
+  const source=[product?.name,product?.slug,product?.description,product?.how_to_use].filter(Boolean).join(" ").toLowerCase();
+  const patterns=[
+    [/\\b(12|twelve)\\s*months?\\b|12\\s*شهر|سنة كاملة|لمدة سنة|سنة واحدة/,"المدة: سنة كاملة"],
+    [/\\b(6|six)\\s*months?\\b|6\\s*أشهر|ستة أشهر|لمدة 6 أشهر/,"المدة: 6 أشهر"],
+    [/\\b(3|three)\\s*months?\\b|3\\s*أشهر|ثلاثة أشهر|لمدة 3 أشهر/,"المدة: 3 أشهر"],
+    [/\\b(2|two)\\s*months?\\b|شهرين|لمدة شهرين/,"المدة: شهران"],
+    [/\\b(1|one)\\s*month\\b|شهر واحد|لمدة شهر|لمدة شهر واحد/,"المدة: شهر واحد"],
+    [/\\b(1|one)\\s*year\\b|سنة واحدة|لمدة سنة/,"المدة: سنة واحدة"]
+  ];
+  for(const [pattern,label] of patterns){if(pattern.test(source))return label;}
+  return "اشتراك رقمي";
+}
+function loadProducts(){
   const grid = document.getElementById("productsGrid");
   try {
     const response = await fetch("/api/products", { cache: "no-store" });
@@ -952,7 +965,7 @@ async function loadProducts(){
       id: String(p.id || p.slug || ""),
       name: String(p.name || "منتج"),
       cat: String(p.category || "عام"),
-      duration: String(p.description || ""),
+      duration: getProductDuration(p),
       price: Number(p.price || 0),
       icon: "spark",
       desc: String(p.description || ""),
