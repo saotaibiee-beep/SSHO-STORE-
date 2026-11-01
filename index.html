@@ -420,7 +420,7 @@ function formatProductCardPrice(product){
  const amount=Number(product?.price);
  const currency=String(product?.currency||"USD").toUpperCase();
  const formatted=Number.isFinite(amount)?amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
- return currency==="USD"?"$"+formatted:formatted+" "+escapeHtml(currency);
+ return formatted+" "+escapeHtml(currency);
 }
 function renderProducts(){
  const q=(document.getElementById("searchInput")?.value||"").trim().toLowerCase();
