@@ -276,6 +276,25 @@ svg{flex-shrink:0}
 .sell-card-form{display:grid;gap:14px;padding-bottom:8px}.sell-card-form label{display:grid;gap:7px;color:var(--text,#fff);font-size:14px}.sell-card-form input,.sell-card-form select{width:100%;box-sizing:border-box;background:#15121e;color:#fff;border:1px solid #383143;border-radius:12px;padding:13px;font:inherit;min-height:46px}.sell-card-form .sell-card-row{display:grid;grid-template-columns:2fr 1fr;gap:10px}.sell-card-form .notice{line-height:1.7}.sell-card-form .muted{font-size:12px;line-height:1.7;color:#b9b3c5}.sell-card-form button:disabled{opacity:.65}.sell-card-form #sellCardMessage{font-size:13px;line-height:1.7;color:#78e0b2}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+
+<style id="ssho-product-card-price-update">
+/* Homepage product cards: exactly image, name, duration, and prominent price. */
+.product-card-minimal{padding:0;overflow:hidden;display:flex;flex-direction:column;min-width:0;min-height:0;cursor:pointer;transition:transform .16s ease,border-color .16s ease}
+.product-card-minimal:active{transform:scale(.985)}
+.product-card-minimal:focus-visible{outline:2px solid #168dff;outline-offset:3px}
+.product-card-minimal .product-art{flex:0 0 auto;width:100%;height:142px;margin:0;border-radius:0;background:#fff}
+.product-card-minimal .product-art img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+.product-card-minimal .product-showcase-name{padding:12px 12px 0;min-height:58px;font-size:14px;line-height:1.55;font-weight:850;white-space:normal;overflow-wrap:anywhere}
+.product-card-minimal .product-showcase-duration{padding:7px 12px 0;min-height:37px;font-size:11px;line-height:1.6;color:#aeb9cc}
+.product-card-minimal .product-showcase-price{margin-top:auto;padding:13px 12px 15px;font-size:clamp(17px,4.8vw,23px);line-height:1.25;font-weight:950;color:#7dd3fc;direction:ltr;unicode-bidi:isolate;white-space:nowrap;overflow:visible;text-overflow:clip;letter-spacing:-.3px}
+@media(max-width:380px){
+ .product-card-minimal .product-art{height:118px}
+ .product-card-minimal .product-showcase-name{padding-inline:9px;font-size:13px;min-height:53px}
+ .product-card-minimal .product-showcase-duration{padding-inline:9px;font-size:10px}
+ .product-card-minimal .product-showcase-price{padding:11px 9px 13px;font-size:clamp(16px,4.7vw,19px)}
+}
+</style>
+
 </head>
 <body>
 <div class="app" id="app">
@@ -393,6 +412,12 @@ const iconSvgs={
 };
 let activeCategory="الكل",quickAmount=1,selectedMethod="USDT BEP20",orderFilter="all",orders=[],notificationsEnabled=true,hideBalance=false;
 function money(n){return Number(n).toFixed(2)}
+function formatProductCardPrice(product){
+ const amount=Number(product?.price);
+ const currency=String(product?.currency||"USD").toUpperCase();
+ const formatted=Number.isFinite(amount)?amount.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2}):"—";
+ return currency==="USD"?"$"+formatted:formatted+" "+escapeHtml(currency);
+}
 function renderProducts(){
  const q=(document.getElementById("searchInput")?.value||"").trim().toLowerCase();
  const filtered=products.filter(p=>(activeCategory==="الكل"||p.cat===activeCategory)&&(!q||(p.name+" "+p.cat+" "+p.duration).toLowerCase().includes(q)));
@@ -400,12 +425,12 @@ function renderProducts(){
  if(!filtered.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1;padding:25px"><h3>ما لقينا المنتج</h3><p>جرّب كلمة بحث ثانية أو اختر فئة مختلفة.</p></div>';return}
  grid.innerHTML=filtered.map(p=>{
   const stockKnown=Number.isFinite(Number(p.stock_count))&&p.stock_count!==null&&p.stock_count!=="";
-  const stockLabel=p.available===false?"غير متوفر":(stockKnown?(Number(p.stock_count)>0?"متوفر "+Number(p.stock_count)+" قطعة":"نفد المخزون"):"متوفر");
   const disabled=p.available===false||(stockKnown&&Number(p.stock_count)<1);
   return `<article class="product product-showcase product-card-minimal ${disabled?"is-unavailable":""}" role="button" tabindex="0" aria-label="تفاصيل ${escapeHtml(p.name)}" onclick="showProduct('${escapeHtml(p.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProduct('${escapeHtml(p.id)}')}">
    <div class="product-art product-art-image">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
    <h3 class="product-showcase-name">${escapeHtml(p.name)}</h3>
-   <div class="product-showcase-duration">${escapeHtml(p.duration||"منتج رقمي")}</div>
+   <div class="product-showcase-duration">${escapeHtml(p.duration||"اشتراك رقمي")}</div>
+   <div class="product-showcase-price" aria-label="السعر">${formatProductCardPrice(p)}</div>
   </article>`;
  }).join("");
 }
