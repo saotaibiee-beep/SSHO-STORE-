@@ -323,14 +323,14 @@ svg{flex-shrink:0}
     <div class="hero-orb"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M24 5 28.5 18.5 42 23l-13.5 4.5L24 41l-4.5-13.5L6 23l13.5-4.5L24 5Z" stroke-linejoin="round"/><path d="m37 5 1.5 4.5L43 11l-4.5 1.5L37 17l-1.5-4.5L31 11l4.5-1.5L37 5Z"/></svg></div>
   </div>
   <section id="sellDigitalCardsBanner" class="sell-promo" role="button" tabindex="0" aria-label="بيع بطاقتك الرقمية واستلم USDT" onclick="openSellGiftCards()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSellGiftCards()}">
-    <div class="sell-promo-top"><span class="sell-promo-badge">✦ خدمة جديدة للعملاء</span><span class="sell-promo-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.8" y="6" width="18.4" height="12.8" rx="2.2"/><path d="M3 10h18M7 14h4m5 0h1" stroke-linecap="round"/><path d="m15.5 3 2 2 3.5-1" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+    <div class="sell-promo-top"><span class="sell-promo-badge">✦ خدمة جديدة</span><span class="sell-promo-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.8" y="6" width="18.4" height="12.8" rx="2.2"/><path d="M3 10h18M7 14h4m5 0h1" stroke-linecap="round"/><path d="m15.5 3 2 2 3.5-1" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
     <h2>عندك بطاقة رقمية ما تحتاجها؟<br><span style="color:#70ddff">بعها لنا واستلم USDT</span></h2>
     <p>نون، Amazon، Google Play، Steam وغيرها. أرسل بيانات بطاقتك بأمان للمراجعة اليدوية، وحدد محفظة USDT لاستلام المبلغ بعد التحقق.</p>
-    <div class="sell-promo-bottom"><button class="sell-promo-cta" type="button" onclick="event.stopPropagation();openSellGiftCards()">اضغط هنا لبيع بطاقتك <span aria-hidden="true">←</span></button><span class="sell-promo-note">مراجعة يدوية قبل التحويل</span></div>
+    <div class="sell-promo-bottom"><button class="sell-promo-cta" type="button" onclick="event.stopPropagation();openSellGiftCards()">اضغط هنا لبيع بطاقتك <span aria-hidden="true">←</span></button></div>
   </section>
   <div class="section-head"><h2>تسوق حسب الفئة</h2></div>
   <div class="categories" id="categories">
-    <button class="cat active" data-cat="الكل" onclick="setCategory('الكل',this)">الكل</button><button class="cat" data-cat="ذكاء اصطناعي" onclick="setCategory('ذكاء اصطناعي',this)">ذكاء اصطناعي</button><button class="cat" data-cat="مونتاج وتصميم" onclick="setCategory('مونتاج وتصميم',this)">مونتاج وتصميم</button><button class="cat" data-cat="ترفيه" onclick="setCategory('ترفيه',this)">ترفيه</button><button class="cat" data-cat="بطاقات رقمية" onclick="setCategory('بطاقات رقمية',this)">بطاقات رقمية</button>
+    <button class="cat active" data-cat="الكل" onclick="setCategory('الكل',this)">الكل</button><button class="cat" data-cat="ذكاء اصطناعي" onclick="setCategory('ذكاء اصطناعي',this)">ذكاء اصطناعي</button><button class="cat" data-cat="مونتاج وتصميم" onclick="setCategory('مونتاج وتصميم',this)">مونتاج وتصميم</button><button class="cat" data-cat="ترفيه" onclick="setCategory('ترفيه',this)">ترفيه</button><button class="cat" data-cat="بطاقات رقمية" onclick="setCategory('بطاقات رقمية',this)">بطاقات رقمية</button><button class="cat" data-cat="بطاقات شحن الجوال" onclick="setCategory('بطاقات شحن الجوال',this)">بطاقات شحن الجوال</button>
   </div>
   <div class="section-head" id="productsSection"><h2>منتجات مختارة</h2><button class="section-link" onclick="setCategory('الكل',document.querySelector('[data-cat=&quot;الكل&quot;]'))">عرض الكل</button></div>
   <div class="products" id="productsGrid"></div>
@@ -439,7 +439,19 @@ function renderProducts(){
  }).join("");
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function setCategory(cat,el){activeCategory=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts()}
+function normalizeProductCategory(category,name,slug){
+ const raw=String(category||"").trim().toLowerCase();
+ const text=(String(name||"")+" "+String(slug||"")+" "+raw).toLowerCase();
+ if(/بطاقات? شحن|شحن الجوال|mobile recharge|recharge card|phone top.?up/.test(text)) return "بطاقات شحن الجوال";
+ if(/بطاقات? رقمية|gift.?card|digital card|itunes|google play|playstation|xbox|steam wallet/.test(text)) return "بطاقات رقمية";
+ if(/ذكاء اصطناعي|artificial intelligence|ai tools|chatgpt|gemini|openai|claude|midjourney/.test(text)) return "ذكاء اصطناعي";
+ if(/مونتاج|تصميم|video edit|editing|design|capcut|canva|adobe/.test(text)) return "مونتاج وتصميم";
+ if(/ترفيه|entertainment|youtube|netflix|iptv|streaming|spotify|disney/.test(text)) return "ترفيه";
+ const exact=["ذكاء اصطناعي","مونتاج وتصميم","ترفيه","بطاقات رقمية","بطاقات شحن الجوال"];
+ const found=exact.find(c=>raw===c.toLowerCase());
+ return found||String(category||"عام").trim();
+}
+function setCategory(cat,el){activeCategory=cat;document.querySelectorAll(".cat").forEach(b=>b.classList.toggle("active",b.dataset.cat===cat));renderProducts();document.getElementById("productsSection")?.scrollIntoView({behavior:"smooth",block:"start"})}
 function go(page){
  document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id==="page-"+page));
  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
@@ -718,7 +730,7 @@ async function createDepositRequest(){
          '<div class="deposit-address-card"><div class="deposit-address-content"><div class="deposit-summary-label">عنوان المحفظة</div><div class="deposit-address-text" dir="ltr" id="depositAddressText">'+escapeHtml(address)+'</div></div></div>'+
          '<button type="button" class="deposit-copy" id="depositCopyButton" onclick="copyDepositAddress(this.dataset.address)" data-address="'+escapeHtml(address)+'">▢　نسخ عنوان المحفظة</button>'+
        '</div>'+
-       '<div class="deposit-warning">تأكد من استخدام شبكة <b>'+escapeHtml(network.short)+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.</div>'+
+       '<div class="deposit-warning">تأكد من أن عنوان المحفظة يدعم نوع الشبكة USDT قبل التحويل. لا ترسل عبارة الاسترداد أو المفتاح الخاص.</div>'+
        (selectedMethod==="USDT BEP20"
          ? '<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+Number(d.depositId)+')">تحقق من المعاملة</button></div>'
          : '')+
@@ -1041,7 +1053,7 @@ async function loadProducts(){
       if (!data || !Array.isArray(data.products)) throw new Error("Products API returned an invalid payload");
       products = data.products.map(p => ({
         id: String(p.id || p.slug || ""), name: String(p.name || "منتج"),
-        cat: String(p.category || "عام"), duration: getProductDuration(p),
+        cat: normalizeProductCategory(p.category, p.name, p.slug), duration: getProductDuration(p),
         price: Number(p.price || 0), icon: "spark", desc: String(p.description || ""),
         image: String(p.image_url || ""), currency: String(p.currency || "USD"),
         available: p.available !== false, stock_count: p.stock_count ?? null,
