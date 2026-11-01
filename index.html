@@ -942,7 +942,7 @@ function applyTelegramUser(){
  catch(e){}
 }
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
-async function getProductDuration(product){
+function getProductDuration(product){
   const source=[product?.name,product?.slug,product?.description,product?.how_to_use].filter(Boolean).join(" ").toLowerCase();
   const patterns=[
     [/\b(12|twelve)\s*months?\b|12\s*شهر|سنة كاملة|لمدة سنة|سنة واحدة/,"المدة: سنة كاملة"],
@@ -957,11 +957,19 @@ async function getProductDuration(product){
 }
 async function loadProducts(){
   const grid = document.getElementById("productsGrid");
+  if (!grid) return;
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:25px">جارٍ تحميل المنتجات…</div>';
   try {
-    const response = await fetch("/api/products", { cache: "no-store" });
-    if (!response.ok) throw new Error("Failed to load products");
+    const response = await fetch(new URL("/api/products", window.location.origin).toString(), {
+      method: "GET",
+      cache: "no-store",
+      headers: { "Accept": "application/json" },
+      credentials: "omit"
+    });
+    if (!response.ok) throw new Error("Products API returned HTTP " + response.status);
     const data = await response.json();
-    products = (Array.isArray(data.products) ? data.products : []).map(p => ({
+    if (!data || !Array.isArray(data.products)) throw new Error("Products API returned an invalid payload");
+    products = data.products.map(p => ({
       id: String(p.id || p.slug || ""),
       name: String(p.name || "منتج"),
       cat: String(p.category || "عام"),
@@ -979,10 +987,11 @@ async function loadProducts(){
     }));
     renderProducts();
   } catch (error) {
-    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:25px">تعذر تحميل المنتجات. أعد تحميل الصفحة.</div>';
+    console.error("[SSHO STORE] Product loading failed:", error);
+    grid.innerHTML = '<div class="empty" style="grid-column:1/-1;padding:25px"><h3>تعذر تحميل المنتجات</h3><p>تحقق من الاتصال ثم أعد المحاولة.</p><button class="secondary" type="button" onclick="loadProducts()">إعادة المحاولة</button></div>';
   }
 }
-loadProducts();
+document.addEventListener("DOMContentLoaded", () => { loadProducts(); });
 renderOrders();
 applyTelegramUser();
 checkAdminAccess();
