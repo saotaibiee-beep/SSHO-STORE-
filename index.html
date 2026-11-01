@@ -439,7 +439,7 @@ function renderProducts(){
   const stockKnown=Number.isFinite(Number(p.stock_count))&&p.stock_count!==null&&p.stock_count!=="";
   const disabled=p.available===false||(stockKnown&&Number(p.stock_count)<1);
   return `<article class="product product-showcase product-card-minimal ${disabled?"is-unavailable":""}" role="button" tabindex="0" aria-label="تفاصيل ${escapeHtml(p.name)}" onclick="showProduct('${escapeHtml(p.id)}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();showProduct('${escapeHtml(p.id)}')}">
-   <div class="product-art product-art-image">${p.image && String(p.image).trim() ? `<img src="${escapeHtml(String(p.image).trim())}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.hidden=true;this.parentElement.classList.add('image-load-failed');this.parentElement.insertAdjacentHTML('beforeend','<span class=&quot;product-image-fallback&quot; aria-label=&quot;تعذر تحميل الصورة&quot;>✦</span>')">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
+   <div class="product-art product-art-image">${p.image && String(p.image).trim() ? `<img src="${escapeHtml(String(p.image).trim())}" alt="${escapeHtml(p.name)}" loading="lazy" decoding="async" onerror="this.onerror=null;this.classList.add('image-load-failed');this.alt='تعذر تحميل الصورة: '+this.alt">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
    <h3 class="product-showcase-name">${escapeHtml(p.name)}</h3>
    <div class="product-showcase-duration">${escapeHtml(p.duration||"اشتراك رقمي")}</div>
    <div class="product-showcase-price" aria-label="السعر">${formatProductCardPrice(p)}</div>
