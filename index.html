@@ -325,7 +325,7 @@ svg{flex-shrink:0}
   <section id="sellDigitalCardsBanner" class="sell-promo" role="button" tabindex="0" aria-label="بيع بطاقتك الرقمية واستلم USDT" onclick="openSellGiftCards()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSellGiftCards()}">
     <div class="sell-promo-top"><span class="sell-promo-badge">✦ خدمة جديدة</span><span class="sell-promo-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="2.8" y="6" width="18.4" height="12.8" rx="2.2"/><path d="M3 10h18M7 14h4m5 0h1" stroke-linecap="round"/><path d="m15.5 3 2 2 3.5-1" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
     <h2>عندك بطاقة رقمية ما تحتاجها؟<br><span style="color:#70ddff">بعها لنا واستلم USDT</span></h2>
-    <p>نون، Amazon، Google Play، Steam وغيرها. أرسل بيانات بطاقتك بأمان للمراجعة اليدوية، وحدد محفظة USDT لاستلام المبلغ بعد التحقق.</p>
+    <p>نون، Amazon، Google Play، Steam، وبطاقات شحن الجوال وغيرها. أرسل بيانات البطاقة المطلوبة وحدد محفظة USDT لاستلام المبلغ بعد التحقق.</p>
     <div class="sell-promo-bottom"><button class="sell-promo-cta" type="button" onclick="event.stopPropagation();openSellGiftCards()">اضغط هنا لبيع بطاقتك <span aria-hidden="true">←</span></button></div>
   </section>
   <div class="section-head"><h2>تسوق حسب الفئة</h2></div>
@@ -443,10 +443,10 @@ function normalizeProductCategory(category,name,slug){
  const raw=String(category||"").trim().toLowerCase();
  const text=(String(name||"")+" "+String(slug||"")+" "+raw).toLowerCase();
  if(/بطاقات? شحن|شحن الجوال|mobile recharge|recharge card|phone top.?up/.test(text)) return "بطاقات شحن الجوال";
- if(/بطاقات? رقمية|gift.?card|digital card|itunes|google play|playstation|xbox|steam wallet/.test(text)) return "بطاقات رقمية";
  if(/ذكاء اصطناعي|artificial intelligence|ai tools|chatgpt|gemini|openai|claude|midjourney/.test(text)) return "ذكاء اصطناعي";
  if(/مونتاج|تصميم|video edit|editing|design|capcut|canva|adobe/.test(text)) return "مونتاج وتصميم";
  if(/ترفيه|entertainment|youtube|netflix|iptv|streaming|spotify|disney/.test(text)) return "ترفيه";
+ if(/بطاقات? رقمية|gift.?card|digital card|itunes|google play|playstation|xbox|steam wallet|amazon|نون/.test(text)) return "بطاقات رقمية";
  const exact=["ذكاء اصطناعي","مونتاج وتصميم","ترفيه","بطاقات رقمية","بطاقات شحن الجوال"];
  const found=exact.find(c=>raw===c.toLowerCase());
  return found||String(category||"عام").trim();
@@ -1077,8 +1077,8 @@ async function loadProducts(){
 }
 function openSellGiftCards(){
  const body=`<form id="sellGiftCardForm" class="sell-card-form" onsubmit="submitSellGiftCard(event)">
- <p class="notice">سيتم فحص البطاقة يدوياً من الإدارة. لا يتم تحويل USDT إلا بعد التحقق من صلاحية الكود، ولا يوجد تحويل مالي آلي.</p>
- <label>نوع البطاقة <select name="card_type" required><option value="">اختر نوع البطاقة</option><option>نون</option><option>Amazon</option><option>Razer Gold</option><option>iTunes / Apple</option><option>Google Play</option><option>PlayStation</option><option>Xbox</option><option>Steam</option><option>بطاقة أخرى</option></select></label>
+ <p class="notice">يتم تحويل USDT بعد التحقق من صلاحية البطاقة.</p>
+ <label>نوع البطاقة <select name="card_type" required><option value="">اختر نوع البطاقة</option><option>نون</option><option>Amazon</option><option>Razer Gold</option><option>iTunes / Apple</option><option>Google Play</option><option>PlayStation</option><option>Xbox</option><option>Steam</option><option>بطاقة شحن الجوال</option><option>STC</option><option>موبايلي</option><option>زين</option><option>بطاقة أخرى</option></select></label>
  <label>كود / رقم البطاقة <input name="card_code" required minlength="4" maxlength="300" autocomplete="off" placeholder="أدخل كود البطاقة"></label>
  <div class="sell-card-row"><label>القيمة الاسمية <input name="face_value" type="number" min="0.01" max="1000000" step="0.01" required placeholder="مثال: 50"></label><label>العملة <select name="currency"><option>USD</option><option>SAR</option><option>EUR</option><option>GBP</option></select></label></div>
  <label>عنوان محفظة USDT الخاصة بك <input name="usdt_wallet_address" required minlength="20" maxlength="160" autocomplete="off" placeholder="عنوان الاستلام — تحقق من الشبكة بنفسك"></label>
