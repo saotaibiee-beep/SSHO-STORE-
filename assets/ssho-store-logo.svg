@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+<title id="title">SSHO STORE</title><desc id="desc">شعار SSHO STORE البنفسجي والأسود والأبيض مع حقيبة تسوق وتاج ذهبي.</desc>
+<defs>
+ <radialGradient id="bg" cx="50%" cy="35%" r="75%"><stop offset="0" stop-color="#211331"/><stop offset="1" stop-color="#050509"/></radialGradient>
+ <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e08aff"/><stop offset=".45" stop-color="#9b32ff"/><stop offset="1" stop-color="#5100bf"/></linearGradient>
+ <linearGradient id="silver" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff"/><stop offset="1" stop-color="#c9c7d4"/></linearGradient>
+ <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0a1"/><stop offset="1" stop-color="#e9a500"/></linearGradient>
+ <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<circle cx="256" cy="256" r="244" fill="url(#bg)" stroke="#7e20ff" stroke-width="7"/>
+<circle cx="256" cy="256" r="232" fill="none" stroke="#d08aff" stroke-opacity=".5" stroke-width="1.5"/>
+<g filter="url(#glow)">
+ <path d="M175 145h162l18 104H157z" fill="url(#purple)" stroke="#c77bff" stroke-width="3"/>
+ <path d="M201 148v-24a30 30 0 0 1 60 0v24M275 148v-24a30 30 0 0 1 60 0v24" fill="none" stroke="#b45cff" stroke-width="10" stroke-linecap="round"/>
+ <path d="M269 77l16 20 25-16 2 26 29 0-19 22-48-9-28-21z" fill="url(#gold)" stroke="#ffdf66" stroke-width="2"/>
+ <path d="M205 178h72c24 0 26 28 0 28h-37c-24 0-23 26 1 26h48" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+</g>
+<text x="256" y="314" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="94" font-weight="900" letter-spacing="-5" fill="url(#silver)" stroke="#ffffff" stroke-opacity=".3" stroke-width="1">SSHO</text>
+<g transform="translate(355 278)" fill="none" stroke="#9d37ff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"><path d="M-15 -10h9l8 34h35l8-25H0"/><circle cx="7" cy="34" r="3" fill="#9d37ff"/><circle cx="31" cy="34" r="3" fill="#9d37ff"/></g>
+<text x="256" y="371" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="49" font-weight="900" letter-spacing="10" fill="url(#purple)">STORE</text>
+<path d="M100 390h312" stroke="#8f35ff" stroke-width="2" opacity=".7"/>
+<text x="256" y="414" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="13" font-weight="700" letter-spacing="3.2" fill="#f4edf9">SHOP SMART • SHOP EASY</text>
+<path d="M205 438h-50m152 0h50" stroke="#bba6d2" stroke-width="2" stroke-linecap="round"/><path d="M256 429l4 9-4 9-4-9z" fill="#b039ff"/>
+</svg>
