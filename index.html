@@ -739,8 +739,8 @@ async function createDepositRequest(){
        '</div>'+
        '<div class="deposit-warning">تأكد من استخدام شبكة <b>'+escapeHtml(network.short)+'</b> فقط. إرسال الأموال عبر شبكة مختلفة قد يؤدي إلى فقدانها.</div>'+
        (selectedMethod==="USDT BEP20"
-         ? '<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+Number(d.depositId)+')">تحقق من المعاملة</button></div>'
-         : '')+
+         ? '<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+Number(d.depositId)+')">تحقق من المعاملة على الشبكة</button></div>'
+         : '<div class="deposit-verify"><label for="usdtWalletTxid">رقم المعاملة (TxID / Signature)</label><input id="usdtWalletTxid" class="field" dir="ltr" autocomplete="off" placeholder="أدخل رقم المعاملة بعد التحويل"><button type="button" class="primary wide" onclick="submitUsdtWalletDeposit('+Number(d.depositId)+')">إرسال إثبات الشحن للمراجعة</button><small style="display:block;margin-top:8px;line-height:1.7">سيُضاف الرصيد بعد تحقق الإدارة من وصول المبلغ.</small></div>')+
        '<button class="secondary wide" onclick="closeModal()">إغلاق</button>'+
      '</div>';
    openModal();
@@ -881,9 +881,24 @@ async function switchDepositNetwork(method){
   if(method==="USDT BEP20"){
    const html='<div class="deposit-verify"><label for="bep20TxHash">رقم المعاملة (Transaction Hash)</label><input id="bep20TxHash" class="field" dir="ltr" autocomplete="off" placeholder="0x..."><button class="primary wide" onclick="verifyBep20Deposit('+window.currentDepositId+')">تحقق من المعاملة</button></div>';
    if(verify)verify.outerHTML=html;else if(warning)warning.insertAdjacentHTML("afterend",html);
-  }else if(verify)verify.innerHTML="";
+  }else{
+   const html='<div class="deposit-verify"><label for="usdtWalletTxid">رقم المعاملة (TxID / Signature)</label><input id="usdtWalletTxid" class="field" dir="ltr" autocomplete="off" placeholder="أدخل رقم المعاملة بعد التحويل"><button type="button" class="primary wide" onclick="submitUsdtWalletDeposit('+window.currentDepositId+')">إرسال إثبات الشحن للمراجعة</button><small style="display:block;margin-top:8px;line-height:1.7">سيُضاف الرصيد بعد تحقق الإدارة من وصول المبلغ.</small></div>';
+   if(verify)verify.outerHTML=html;else if(warning)warning.insertAdjacentHTML("afterend",html);
+  }
   showToast("تم تغيير الشبكة وإنشاء طلب جديد");
  }catch(e){buttons.forEach(b=>b.disabled=false);showToast(e.message||"تعذر تغيير الشبكة")}
+}
+async function submitUsdtWalletDeposit(depositId){
+ const input=document.getElementById("usdtWalletTxid"),txid=(input?.value||"").trim();
+ if(txid.length<32||txid.length>160){showToast("أدخل رقم معاملة صحيحاً");input?.focus();return;}
+ if(selectedMethod==="USDT BEP20"){showToast("استخدم زر التحقق من المعاملة على الشبكة لهذه الشبكة");return;}
+ const initData=window.Telegram?.WebApp?.initData||"";if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
+ const button=document.querySelector("#modalBody .deposit-verify button");if(button){button.disabled=true;button.textContent="جارٍ إرسال الإثبات…";}
+ try{
+  const r=await fetch(API_BASE+"/api/deposits",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"submit_usdt",depositId:Number(depositId),method:selectedMethod,txid})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إرسال إثبات الشحن");
+  openInfo("تم إرسال إثبات الشحن","رقم طلب الشحن: <b>"+Number(d.depositId||depositId)+"</b><br>الحالة: <b>بانتظار مراجعة الإدارة</b><br><br>سيُضاف الرصيد بعد التأكد من وصول المبلغ إلى عنوان المتجر.");
+ }catch(e){showToast(e.message||"تعذر إرسال إثبات الشحن");if(button){button.disabled=false;button.textContent="إرسال إثبات الشحن للمراجعة";}}
 }
 async function verifyBep20Deposit(depositId){
  const input=document.getElementById("bep20TxHash");
