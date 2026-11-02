@@ -68,7 +68,7 @@ export default async function handler(req, res) {
             const existingRes = await fetch(`${base}/rest/v1/orders?telegram_id=eq.${user.id}&idempotency_key=eq.${encodeURIComponent(idempotencyKey)}&select=id,order_number,status,unit_price,currency,product_name&limit=1`, { headers });
             const existing = await existingRes.json().catch(() => []);
             if (!existingRes.ok) return res.status(502).json({ error: "تعذر التحقق من الطلب" });
-            if (existing?.length) return res.status(200).json({ order: existing[0], duplicate: true });
+            if (existing?.length) return res.status(200).json({ order: existing[0], duplicate: true, paymentNetworks: Object.fromEntries(Object.entries(NETWORKS).map(([name, config]) => [name, { address: config.address }])) });
             const userRes = await fetch(`${base}/rest/v1/users?on_conflict=telegram_id`, {
               method: "POST",
               headers: { ...headers, Prefer: "resolution=ignore-duplicates,return=minimal" },
@@ -91,7 +91,7 @@ export default async function handler(req, res) {
               console.error("Create direct USDT order failed", orderRes.status, JSON.stringify(orders).slice(0, 300));
               return res.status(502).json({ error: "تعذر إنشاء الطلب. لم يتم تحصيل أي مبلغ." });
             }
-            return res.status(201).json({ order: orders[0], duplicate: false });
+            return res.status(201).json({ order: orders[0], duplicate: false, paymentNetworks: Object.fromEntries(Object.entries(NETWORKS).map(([name, config]) => [name, { address: config.address }])) });
           }
       
           if (action === "submit") {
