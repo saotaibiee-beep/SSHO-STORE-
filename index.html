@@ -257,6 +257,25 @@ svg{flex-shrink:0}
 .product-details-actions button:disabled{opacity:.5;cursor:not-allowed}
 .product-buy-usdt{background:linear-gradient(110deg,#183a60,#1a2a40)!important;border:1px solid #416d9c!important;color:#e2efff!important}
 .product-details-footnote{font-size:10px;line-height:1.6;text-align:center;color:#8395ae;margin:0}
+.product-details-heading h3{font-size:19px!important;font-weight:900!important;letter-spacing:-.2px}
+.product-details-heading p{margin-top:6px!important;white-space:pre-line;overflow-wrap:anywhere}
+.product-details-summary>div{min-width:0;padding:13px!important;background:linear-gradient(145deg,#182a40,#131f2e)!important}
+.product-details-summary .product-price-card strong{font-size:19px!important;color:#8bd7ff!important;direction:ltr;unicode-bidi:isolate;display:block}
+.product-details-summary .product-stock-card strong{display:block;font-size:14px!important;margin-top:2px}
+.product-detail-section{box-shadow:0 6px 18px rgba(0,0,0,.08)}
+.product-notice-section{background:linear-gradient(145deg,#28291f,#1d2026)!important;border-color:#62583a!important}
+.product-notice-section h4 span{color:#f3ce77!important}
+.product-notice-section p{color:#e0d8bf!important}
+.product-feature-list{list-style:none;padding:0;margin:0;display:grid;gap:9px}
+.product-feature-list li{display:grid;grid-template-columns:26px minmax(0,1fr);gap:9px;align-items:start;color:#c9d8ea;font-size:12px;line-height:1.8}
+.product-feature-icon{width:26px;height:26px;display:grid;place-items:center;border-radius:9px;background:#203752;border:1px solid #345678;font-size:13px}
+.product-details-actions{z-index:2;grid-template-columns:1fr 1fr;gap:8px;padding:10px 0 2px!important}
+.product-details-actions button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:58px!important;padding:8px 5px!important;font-size:12px!important;font-weight:850!important;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+.product-details-actions button strong{font-size:13px;direction:ltr;unicode-bidi:isolate;line-height:1.2}
+.product-details-actions .product-buy-balance{background:linear-gradient(115deg,#087fc2,#155e9a)!important;border:1px solid #40b9f4!important;color:#fff!important}
+.product-buy-usdt{background:linear-gradient(115deg,#2d5b3e,#1c382d)!important;border:1px solid #4d966d!important;color:#e4ffe9!important}
+.product-details-actions button:disabled{filter:grayscale(.5);box-shadow:none}
+
 @media(max-width:380px){.product-showcase .product-art{height:116px!important}.product-showcase-name{font-size:13px!important;padding-inline:10px!important}.product-showcase-price{font-size:14px!important}.product-details-hero{grid-template-columns:86px minmax(0,1fr)}.product-details-art{height:92px}.product-details-heading h3{font-size:15px}.product-details-summary strong{font-size:14px}}
 
 
@@ -467,14 +486,28 @@ if(page==="orders")loadOrders();if(page==="account")updateStats();
  window.scrollTo({top:0,behavior:"smooth"});
  try{if(window.Telegram?.WebApp?.HapticFeedback)Telegram.WebApp.HapticFeedback.selectionChanged()}catch(e){}
 }
+function cleanProductText(value){
+ return String(value??"")
+  .replace(/\\r\\n|\\n|\\r/g,"\n")
+  .replace(/\r\n|\r/g,"\n")
+  .replace(/\\t/g," ")
+  .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/g,"")
+  .trim();
+}
+function splitProductLines(value){
+ const raw=cleanProductText(value);
+ return raw.split(/\n+|(?<=\\.)\s+(?=\\d+[.)、-]\s*)/).map(s=>s.replace(/^\s*(?:[-*•▪◦]+|\\d+[.)、-])\s*/,"").trim()).filter(Boolean);
+}
+function formatFeatureList(value){
+ const items=splitProductLines(value);
+ if(!items.length)return "";
+ const icons=["✨","⚡","🛡️","🎯","💎","📱","🔒","🚀"];
+ return '<ul class="product-feature-list">'+items.map((item,i)=>'<li><span class="product-feature-icon">'+icons[i%icons.length]+'</span><span>'+escapeHtml(item)+'</span></li>').join("")+'</ul>';
+}
 function formatUsageSteps(value){
- const raw=String(value||"").trim();
- if(!raw)return '<p class="product-usage-empty">سيتم عرض تعليمات الاستخدام عند إضافتها إلى بيانات المنتج.</p>';
- const lines=raw.split(/\\r?\\n|(?<=\\.)\\s+(?=\\d+[.)])/).map(x=>x.trim()).filter(Boolean);
- return '<ol class="usage-steps">'+lines.map((line,i)=>{
-   const clean=line.replace(/^\\s*\\d+[.)、-]?\\s*/,"");
-   return '<li><span class="usage-step-number">'+(i+1)+'</span><span>'+escapeHtml(clean)+'</span></li>';
- }).join("")+'</ol>';
+ const lines=splitProductLines(value);
+ if(!lines.length)return '<p class="product-usage-empty">سيتم عرض تعليمات الاستخدام عند إضافتها إلى بيانات المنتج.</p>';
+ return '<ol class="usage-steps">'+lines.map((line,i)=>'<li><span class="usage-step-number">'+(i+1)+'</span><span>'+escapeHtml(line)+'</span></li>').join("")+'</ol>';
 }
 function showProduct(id){
  const p=products.find(x=>String(x.id)===String(id));if(!p)return;
@@ -484,24 +517,33 @@ function showProduct(id){
  const stock=stockKnown?Math.max(0,Number(p.stock_count)):null;
  const unavailable=p.available===false||(stock!==null&&stock<1);
  const currency=String(p.currency||"USD").toUpperCase();
- const note=p.important_notes||p.notice||"راجع شروط المنتج قبل الشراء. المنتجات الرقمية قد تختلف شروط استرجاعها حسب حالة التسليم والتفعيل.";
+ const description=cleanProductText(p.desc||p.description||p.duration||"منتج رقمي");
+ const featureSource=p.features||p.features_list||p.benefits||"";
+ const descriptionLines=splitProductLines(description);
+ const featureItems=splitProductLines(featureSource);
+ const descriptionIsList=descriptionLines.length>1;
+ const featureMarkup=featureItems.length?formatFeatureList(featureSource):(descriptionIsList?formatFeatureList(description):"");
+ const descriptionMarkup=descriptionIsList?(featureItems.length?"":'<section class="product-detail-section"><h4><span>📝</span> وصف المنتج</h4><p>'+escapeHtml(descriptionLines.join("\n"))+'</p></section>'):'<section class="product-detail-section"><h4><span>📝</span> وصف المنتج</h4><p>'+escapeHtml(description||"منتج رقمي")+'</p></section>';
+ const note=cleanProductText(p.important_notes||p.notice||"يرجى مراجعة تفاصيل المنتج قبل الشراء. قد لا تُقبل طلبات استرجاع المنتجات الرقمية بعد التسليم أو التفعيل.");
  const usage=p.how_to_use||p.usage_instructions||p.usage||"";
  document.getElementById("modalTitle").textContent=p.name;
  document.getElementById("modalBody").innerHTML=`
   <div class="product-details-layout">
    <div class="product-details-hero">
     <div class="product-details-art">${p.image ? `<img src="${escapeHtml(p.image)}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">` : (iconSvgs[p.icon]||iconSvgs.spark)}</div>
-    <div class="product-details-heading"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.desc||p.duration||"منتج رقمي")}</p></div>
+    <div class="product-details-heading"><h3>${escapeHtml(p.name)}</h3><p>${escapeHtml(p.duration||"منتج رقمي")}</p></div>
    </div>
    <div class="product-details-summary">
-    <div><small>السعر</small><strong>${escapeHtml(currency)} ${money(p.price)}</strong></div>
-    <div><small>التوفر</small><strong class="${unavailable?"stock-unavailable":"stock-available"}">${unavailable?"غير متوفر":(stock===null?"متوفر":stock+" قطعة")}</strong></div>
+    <div class="product-price-card"><small>السعر</small><strong>${escapeHtml(currency)} ${money(p.price)}</strong></div>
+    <div class="product-stock-card"><small>حالة التوفر</small><strong class="${unavailable?"stock-unavailable":"stock-available"}">${unavailable?"غير متوفر":(stock===null?"متوفر":stock+" قطعة")}</strong></div>
    </div>
+   ${descriptionMarkup}
+   ${featureMarkup?'<section class="product-detail-section"><h4><span>✦</span> المميزات</h4>'+featureMarkup+'</section>':""}
    <section class="product-detail-section product-notice-section"><h4><span>ⓘ</span> ملاحظات وشروط مهمة</h4><p>${escapeHtml(note)}</p></section>
    <section class="product-detail-section product-usage-section"><h4><span>✓</span> طريقة الاستخدام</h4>${formatUsageSteps(usage)}</section>
    <div class="product-details-actions">
-    <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')">${unavailable?"غير متوفر":"شراء من الرصيد"}</button>
-    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')">شراء الآن <span>USDT</span></button>
+    <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')"><span>شراء من الرصيد</span><strong>${escapeHtml(currency)} ${money(p.price)}</strong></button>
+    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')"><span>شراء عبر USDT</span><strong>${money(p.price)} USDT</strong></button>
    </div>
    <p class="product-details-footnote">يتم تأكيد توفر المنتج والسعر من الخادم عند إتمام الطلب.</p>
   </div>`;
