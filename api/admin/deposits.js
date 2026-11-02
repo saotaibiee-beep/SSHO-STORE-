@@ -88,7 +88,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ payments: payments.map(p => ({ ...p, order: orderMap[p.order_id] || null })) });
     }
 
-    if (req.query?.resource === "wallet-deposits") {
+    if (req.query?.resource === "wallet-deposits" && req.method === "PATCH") {
       const depositId = Number(req.body?.depositId);
       const decision = String(req.body?.decision || "");
       if (!Number.isSafeInteger(depositId) || depositId <= 0 || !["confirmed", "rejected"].includes(decision)) {
