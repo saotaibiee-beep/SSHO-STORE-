@@ -487,16 +487,17 @@ if(page==="orders")loadOrders();if(page==="account")updateStats();
  try{if(window.Telegram?.WebApp?.HapticFeedback)Telegram.WebApp.HapticFeedback.selectionChanged()}catch(e){}
 }
 function cleanProductText(value){
+ const newline=String.fromCharCode(10);
  return String(value??"")
-  .replace(/\\r\\n|\\n|\\r/g,"\n")
-  .replace(/\r\n|\r/g,"\n")
+  .replace(/\\r\\n|\\n|\\r/g,newline)
+  .replace(/\r\n|\r/g,newline)
   .replace(/\\t/g," ")
-  .replace(/[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F]/g,"")
+  .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g,"")
   .trim();
 }
 function splitProductLines(value){
- const raw=cleanProductText(value);
- return raw.split(/\n+|(?<=\\.)\s+(?=\\d+[.)、-]\s*)/).map(s=>s.replace(/^\s*(?:[-*•▪◦]+|\\d+[.)、-])\s*/,"").trim()).filter(Boolean);
+ const newline=String.fromCharCode(10);
+ return cleanProductText(value).split(newline).map(s=>s.replace(/^\s*(?:[-*•▪◦]+|\d+[.)、-])\s*/,"").trim()).filter(Boolean);
 }
 function formatFeatureList(value){
  const items=splitProductLines(value);
