@@ -481,7 +481,7 @@ async function requestProductUsdt(id){
   const idempotencyKey=window.crypto?.randomUUID?window.crypto.randomUUID():"usdt-"+Date.now()+"-"+Math.random().toString(36).slice(2);
   const r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"direct_usdt_create",productId:String(p.id),idempotencyKey})});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إنشاء طلب الدفع المباشر");
-  currentDirectUsdtOrder=d.order;currentDirectUsdtNetwork="USDT BEP20";
+  currentDirectUsdtOrder=d.order;if(d.paymentNetworks&&typeof d.paymentNetworks==="object"){for(const [network,config] of Object.entries(d.paymentNetworks)){if(directUsdtNetworks[network]&&typeof config?.address==="string"&&config.address.trim())directUsdtNetworks[network].address=config.address.trim();}}currentDirectUsdtNetwork="USDT BEP20";
   renderDirectUsdtPayment();
  }catch(e){showToast(e.message||"تعذر تجهيز الدفع عبر USDT");}
  finally{if(button){button.disabled=false;button.innerHTML='شراء الآن <span>USDT</span>';}}
