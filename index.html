@@ -1083,6 +1083,14 @@ async function loadProducts(){
   })();
   return window.__sshoProductsLoading;
 }
+// Keep the storefront in sync when an admin updates a product image.
+function handleProductImageUpdated(event){
+ const data=event?.data||(()=>{try{return JSON.parse(localStorage.getItem("ssho-product-image-updated")||"{}")}catch(_){return {}}})();
+ if(data.type&&data.type!=="product-image-updated")return;
+ if(data.productId||data.image_url)loadProducts();
+}
+window.addEventListener("storage",e=>{if(e.key==="ssho-product-image-updated")handleProductImageUpdated({data:null})});
+if("BroadcastChannel" in window){try{const productChannel=new BroadcastChannel("ssho-store-products");productChannel.addEventListener("message",handleProductImageUpdated)}catch(_){}}
 function openSellGiftCards(){
  const body=`<form id="sellGiftCardForm" class="sell-card-form" onsubmit="submitSellGiftCard(event)">
  <p class="notice">يتم تحويل USDT بعد التحقق من صلاحية البطاقة.</p>
