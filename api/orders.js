@@ -47,6 +47,7 @@ export default async function handler(req, res) {
   const baseUrl = supabaseUrl.replace(/\/+$/, "");
 
   if (req.method === "POST" && ["direct_usdt_create", "direct_usdt_submit"].includes(String(req.body?.action || ""))) {
+    const base = baseUrl;
     const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json" };
     const body = req.body || {};
     const action = body.action === "direct_usdt_create" ? "create" : "submit";
