@@ -44,16 +44,16 @@ async function uploadProductImage(id){
  if(!["image/jpeg","image/png","image/webp","image/gif"].includes(file.type)){if(status)status.textContent="الصيغ المدعومة JPG وPNG وWEBP وGIF فقط.";return}
  if(file.size>3*1024*1024){if(status)status.textContent="حجم الصورة يتجاوز 3 ميجابايت.";return}
  const button=document.querySelector('[data-upload-product="'+CSS.escape(id)+'"]');if(button)button.disabled=true;
- if(status)status.textContent="جارٍ رفع الصورة إلى التخزين…";
+ if(status){status.className="status";status.textContent="جارٍ رفع الصورة إلى التخزين…";status.style.color="var(--muted)";}
  try{
   const fileBase64=await readImageBase64(file);
   const result=await api("/api/admin/deposits?resource=products","POST",{productId:id,mimeType:file.type,fileBase64});
   const preview=document.querySelector('[data-product-preview="'+CSS.escape(id)+'"]');
   if(preview){preview.src=result.image_url+"?v="+Date.now();preview.style.display="block"}
   const empty=document.querySelector('[data-image-empty="'+CSS.escape(id)+'"]');if(empty)empty.style.display="none";
-  if(status)status.textContent="تم رفع الصورة وحفظ رابطها في المنتج بنجاح.";
+  if(status){status.className="status ok";status.style.color="var(--green)";status.textContent="✓ تم رفع الصورة وحفظ رابطها في قاعدة البيانات بنجاح.";}try{localStorage.setItem("ssho-product-image-updated",JSON.stringify({productId:id,image_url:result.image_url,at:Date.now()}));if("BroadcastChannel" in window){const channel=new BroadcastChannel("ssho-store-products");channel.postMessage({type:"product-image-updated",productId:id,image_url:result.image_url,at:Date.now()});channel.close()}}catch(_){}
   input.value="";
- }catch(e){if(status)status.textContent=e.message||"فشل رفع الصورة."}
+ }catch(e){if(status){status.className="status";status.style.color="var(--red)";status.textContent="✕ "+(e.message||"فشل رفع الصورة.")}}
  finally{if(button)button.disabled=false}
 }
 async function reviewGift(id,status){const note=$("gift-note-"+id)?.value||"";if(!confirm(status==="approved"?"تأكيد اعتماد بطاقة Binance وإضافة الرصيد للعميل؟":"تأكيد رفض طلب الشحن؟"))return;try{const d=await api("/api/admin/gift-card-submissions","PATCH",{id,status,adminNote:note});setStatus(d.message||"تم حفظ المراجعة.");await loadGift()}catch(e){setStatus(e.message,true)}}
@@ -63,7 +63,7 @@ async function copyText(id){const el=$(id);if(el)copyValue(el.textContent||"")}
 async function copyValue(v){try{await navigator.clipboard.writeText(v);setStatus("تم النسخ.")}catch(_){setStatus("تعذر النسخ التلقائي؛ اضغط مطولاً على النص لنسخه.",true)}}
 document.querySelectorAll(".tab").forEach(b=>b.addEventListener("click",()=>showPanel(b.dataset.panel)));
 $("retryBtn").addEventListener("click",async()=>{setStatus("جارٍ إعادة التحقق…");try{await api("/api/admin/gift-card-submissions?status=pending_review");$("tabs").classList.remove("hidden");setStatus("تم التحقق من صلاحية الإدارة.");showPanel($("refreshBtn").dataset.panel||"gift")}catch(e){setStatus(e.message,true)}});
-document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.copy)copyText(b.dataset.copy);if(b.dataset.copyValue)copyValue(b.dataset.copyValue);if(b.dataset.giftReview)reviewGift(Number(b.dataset.giftReview),b.dataset.reviewStatus);if(b.dataset.sellReview)reviewSell(b.dataset.sellReview,b.dataset.reviewStatus)});
+document.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.copy)copyText(b.dataset.copy);if(b.dataset.copyValue)copyValue(b.dataset.copyValue);if(b.dataset.giftReview)reviewGift(Number(b.dataset.giftReview),b.dataset.reviewStatus);if(b.dataset.sellReview)reviewSell(b.dataset.sellReview,b.dataset.reviewStatus);if(b.dataset.uploadProduct)uploadProductImage(b.dataset.uploadProduct)});
 $("giftFilter").addEventListener("change",loadGift);$("sellFilter").addEventListener("change",loadSell);$("refreshProductsBtn").addEventListener("click",loadProducts);document.addEventListener("change",e=>{const input=e.target.closest("[data-product-file]");if(!input)return;const id=input.dataset.productFile,file=input.files?.[0];if(!file)return;const preview=document.querySelector('[data-product-preview="'+CSS.escape(id)+'"]');if(preview){if(preview.dataset.objectUrl)URL.revokeObjectURL(preview.dataset.objectUrl);const url=URL.createObjectURL(file);preview.dataset.objectUrl=url;preview.src=url;preview.style.display="block"}const empty=document.querySelector('[data-image-empty="'+CSS.escape(id)+'"]');if(empty)empty.style.display="none"});$("refreshBtn").addEventListener("click",()=>loadPanel($("refreshBtn").dataset.panel||"gift"));
 window.addEventListener("error",e=>setStatus("خطأ JavaScript: "+(e.message||"غير معروف"),true));window.addEventListener("unhandledrejection",e=>setStatus("خطأ: "+String(e.reason?.message||e.reason||"غير معروف"),true));
 (async function boot(){try{if(!initData()){setStatus("بيانات جلسة تيليجرام غير متاحة. افتح المتجر من داخل البوت، أو أعد فتحه من زر لوحة الإدارة.",true);return}setStatus("جارٍ التحقق من صلاحيات الإدارة…");await api("/api/admin/gift-card-submissions?status=pending_review");$("tabs").classList.remove("hidden");setStatus("تم التحقق من صلاحية الإدارة.");showPanel("gift")}catch(e){setStatus(e.message||"تعذر التحقق من الصلاحيات. أعد المحاولة.",true)}})();
