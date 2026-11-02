@@ -479,7 +479,7 @@ async function requestProductUsdt(id){
  if(button){button.disabled=true;button.textContent="جارٍ إنشاء الطلب…";}
  try{
   const idempotencyKey=window.crypto?.randomUUID?window.crypto.randomUUID():"usdt-"+Date.now()+"-"+Math.random().toString(36).slice(2);
-  const r=await fetch("/api/orders/usdt",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"create",productId:String(p.id),idempotencyKey})});
+  const r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"direct_usdt_create",productId:String(p.id),idempotencyKey})});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إنشاء طلب الدفع المباشر");
   currentDirectUsdtOrder=d.order;currentDirectUsdtNetwork="USDT BEP20";
   renderDirectUsdtPayment();
@@ -515,7 +515,7 @@ async function submitDirectUsdtPayment(){
  const initData=window.Telegram?.WebApp?.initData||"";if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
  const button=document.getElementById("submitDirectUsdtBtn");if(button){button.disabled=true;button.textContent="جارٍ إرسال الإثبات…";}
  try{
-  const r=await fetch("/api/orders/usdt",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"submit",orderId:o.id,network:currentDirectUsdtNetwork,txid})});
+  const r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"direct_usdt_submit",orderId:o.id,network:currentDirectUsdtNetwork,txid})});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إرسال إثبات الدفع");
   closeModal();showToast("تم إرسال إثبات الدفع للمراجعة");
   openInfo("تم تسجيل إثبات الدفع","رقم الطلب: <b>"+escapeHtml(d.orderNumber||o.order_number)+"</b><br>الحالة: <b>بانتظار التحقق من الدفع</b><br><br>سيتم اعتماد الطلب بعد التأكد من وصول المبلغ. التسليم فوري عادةً وقد يستغرق حتى 30 دقيقة.");
