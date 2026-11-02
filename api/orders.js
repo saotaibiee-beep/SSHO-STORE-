@@ -69,6 +69,15 @@ export default async function handler(req, res) {
             const existing = await existingRes.json().catch(() => []);
             if (!existingRes.ok) return res.status(502).json({ error: "تعذر التحقق من الطلب" });
             if (existing?.length) return res.status(200).json({ order: existing[0], duplicate: true });
+            const userRes = await fetch(`${base}/rest/v1/users?on_conflict=telegram_id`, {
+              method: "POST",
+              headers: { ...headers, Prefer: "resolution=ignore-duplicates,return=minimal" },
+              body: JSON.stringify({ telegram_id: user.id, first_name: user.first_name || null, username: user.username || null, last_seen_at: new Date().toISOString() })
+            });
+            if (!userRes.ok) {
+              console.error("Ensure store user failed", userRes.status, (await userRes.text().catch(() => "")).slice(0, 180));
+              return res.status(502).json({ error: "تعذر تهيئة حساب العميل. لم يتم إنشاء الطلب." });
+            }
             const orderRes = await fetch(`${base}/rest/v1/orders`, {
               method: "POST", headers: { ...headers, Prefer: "return=representation" },
               body: JSON.stringify({
