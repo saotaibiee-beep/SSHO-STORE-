@@ -63,13 +63,13 @@ async function reviewWalletUsdt(depositId,decision){
  if(decision==="rejected"&&!confirm("تأكيد رفض طلب شحن المحفظة؟"))return;
  try{const d=await api("/api/admin/deposits?resource=wallet-deposits","PATCH",{depositId:Number(depositId),decision});setStatus(d.message||"تم حفظ مراجعة الشحن.");await loadWalletUsdtDeposits();if(typeof window.refreshSSHOWalletBalance==="function")window.refreshSSHOWalletBalance()}catch(e){setStatus(e.message,true)}
 }
-\nasync function reviewUsdt(paymentId,decision){
+async function reviewUsdt(paymentId,decision){
  const note=$("usdt-note-"+paymentId)?.value||"";
  if(decision==="confirmed"&&!confirm("هل تحققت من وصول المبلغ الصحيح إلى عنوان المتجر على الشبكة المحددة؟ سيتم اعتماد الطلب وتسجيله كمدفوع."))return;
  if(decision==="rejected"&&!confirm("تأكيد رفض إثبات الدفع؟"))return;
  try{const d=await api("/api/admin/deposits?resource=usdt-orders","PATCH",{paymentId,decision,note});setStatus(d.message||"تم حفظ المراجعة.");await loadUsdt()}catch(e){setStatus(e.message,true)}
 }
-\nasync function loadProducts(){
+async function loadProducts(){
  const box=$("productsList");box.innerHTML='<div class="empty">جارٍ تحميل المنتجات…</div>';
  try{
   const d=await api("/api/admin/deposits?resource=products");const rows=d.products||[];
