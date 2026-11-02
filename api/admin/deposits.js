@@ -59,8 +59,11 @@ export default async function handler(req, res) {
           body: JSON.stringify({ image_url: imageUrl, updated_at: new Date().toISOString() })
         });
         const updated = await updateRes.json().catch(() => []);
-        if (!updateRes.ok || !Array.isArray(updated) || !updated.length) return res.status(502).json({ error: "تم رفع الصورة لكن تعذر ربطها بالمنتج." });
-        return res.status(200).json({ ok: true, image_url: imageUrl, product: updated[0] });
+        if (!updateRes.ok || !Array.isArray(updated) || !updated.length || updated[0].image_url !== imageUrl) return res.status(502).json({ error: "تم رفع الصورة لكن تعذر تأكيد حفظ رابطها في قاعدة البيانات." });
+        const verifyRes = await fetch(`${supabaseUrl}/rest/v1/products?id=eq.${encodeURIComponent(productId)}&select=id,image_url,updated_at`, { headers });
+        const verified = await verifyRes.json().catch(() => []);
+        if (!verifyRes.ok || !Array.isArray(verified) || !verified.length || verified[0].image_url !== imageUrl) return res.status(502).json({ error: "لم يتم تأكيد حفظ رابط الصورة؛ أعد المحاولة." });
+        return res.status(200).json({ ok: true, image_url: imageUrl, product: verified[0], message: "تم رفع الصورة وحفظ رابطها في قاعدة البيانات." });
       }
       res.setHeader("Allow", "GET, POST");
       return res.status(405).json({ error: "Method not allowed" });
