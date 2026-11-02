@@ -458,26 +458,69 @@ function showProduct(id){
     <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')">${unavailable?"غير متوفر":"شراء من الرصيد"}</button>
     <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')">شراء الآن <span>USDT</span></button>
    </div>
-   <p class="product-details-footnote">يتم تأكيد توفر المنتج والسعر من الخادم عند إتمام الطلب.</p>
+   <p class="product-details-footnote">التسليم فوري عادةً، وقد يستغرق حتى 30 دقيقة في بعض الحالات. الدفع المباشر عبر USDT يتطلب تحقق الإدارة من المعاملة قبل اعتماد الطلب.</p>
   </div>`;
  openModal();
 }
+const directUsdtNetworks={
+ "USDT BEP20":{label:"BEP20 — BNB Chain",address:"0x58a0486de1f5f812c574a9b19b6cda426486d837",hint:"رقم المعاملة يبدأ بـ 0x"},
+ "USDT TRC20":{label:"TRC20 — TRON",address:"TYcN3LQmFrVvRudaH42nyFvWjpzkfVLV4i",hint:"أدخل TxID من محفظتك"},
+ "USDT ERC20":{label:"ERC20 — Ethereum",address:"0x58a0486de1f5f812c574a9b19b6cda426486d837",hint:"رقم المعاملة يبدأ بـ 0x"},
+ "USDT SOL":{label:"SOL — Solana",address:"HoAS8BFm332G1Y6dv9puEHnfG8pXtRwcD3TXUoEjUaGM",hint:"أدخل توقيع المعاملة"}
+};
+let currentDirectUsdtOrder=null,currentDirectUsdtNetwork="USDT BEP20";
 async function requestProductUsdt(id){
- const p=products.find(x=>x.id===id);if(!p)return;
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
  const button=document.getElementById("buyWithUsdtBtn");if(button?.disabled)return;
  const initData=window.Telegram?.WebApp?.initData||"";
  if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
  const amount=Number(p.price);
- if(!Number.isFinite(amount)||amount<1||amount>10000){showToast("قيمة المنتج غير صالحة للدفع عبر USDT");return;}
- if(button){button.disabled=true;button.textContent="جارٍ تجهيز الدفع…";}
+ if(!Number.isFinite(amount)||amount<=0||amount>10000){showToast("قيمة المنتج غير صالحة للدفع عبر USDT");return;}
+ if(button){button.disabled=true;button.textContent="جارٍ إنشاء الطلب…";}
  try{
-  const amountInput=document.getElementById("customAmount");
-  if(amountInput)amountInput.value=String(amount);
-  quickAmount=amount;
-  selectedMethod="USDT BEP20";
-  await createDepositRequest();
- }catch(e){showToast(e?.message||"تعذر فتح خيارات الدفع");}
+  const idempotencyKey=window.crypto?.randomUUID?window.crypto.randomUUID():"usdt-"+Date.now()+"-"+Math.random().toString(36).slice(2);
+  const r=await fetch("/api/orders/usdt",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"create",productId:String(p.id),idempotencyKey})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إنشاء طلب الدفع المباشر");
+  currentDirectUsdtOrder=d.order;currentDirectUsdtNetwork="USDT BEP20";
+  renderDirectUsdtPayment();
+ }catch(e){showToast(e.message||"تعذر تجهيز الدفع عبر USDT");}
  finally{if(button){button.disabled=false;button.innerHTML='شراء الآن <span>USDT</span>';}}
+}
+function renderDirectUsdtPayment(){
+ const o=currentDirectUsdtOrder;if(!o)return;
+ const n=directUsdtNetworks[currentDirectUsdtNetwork];
+ document.getElementById("modalTitle").textContent="الدفع المباشر عبر USDT";
+ document.getElementById("modalBody").innerHTML=
+ '<div class="deposit-modal-content">'+
+ '<div class="deposit-summary"><div class="deposit-summary-item"><div class="deposit-token">₮ USDT</div><div class="deposit-qr-title" style="font-size:11px;margin-top:4px">دفع مباشر للمنتج</div></div><div class="deposit-summary-item"><div class="deposit-summary-label">المبلغ المطلوب</div><div class="deposit-summary-value" dir="ltr">'+money(o.unit_price)+' USDT</div></div><div class="deposit-summary-item"><div class="deposit-summary-label">رقم الطلب</div><div class="deposit-summary-value">'+escapeHtml(o.order_number)+'</div></div></div>'+
+ '<div class="deposit-networks" aria-label="اختر شبكة الدفع">'+Object.keys(directUsdtNetworks).map(k=>'<button type="button" class="deposit-network '+(k===currentDirectUsdtNetwork?'active':'')+'" onclick="chooseDirectUsdtNetwork('+JSON.stringify(k)+')" aria-pressed="'+(k===currentDirectUsdtNetwork)+'">'+escapeHtml(k.replace("USDT ",""))+'<small>'+escapeHtml(k==="USDT BEP20"?"BNB Chain":k==="USDT TRC20"?"TRON":k==="USDT ERC20"?"Ethereum":"Solana")+'</small></button>').join("")+'</div>'+
+ '<div class="deposit-qr-card"><div class="deposit-qr-title">حوّل المبلغ إلى عنوان المتجر</div><div class="deposit-address-card"><div class="deposit-address-content"><div class="deposit-summary-label">عنوان الاستلام — '+escapeHtml(n.label)+'</div><div class="deposit-address-text" dir="ltr" id="directUsdtAddress">'+escapeHtml(n.address)+'</div></div></div><button type="button" class="deposit-copy" onclick="copyDirectUsdtAddress()">▢　نسخ عنوان الاستلام</button></div>'+
+ '<div class="deposit-warning">اختر الشبكة نفسها في محفظتك. بعد التحويل، أرسل رقم المعاملة. لن يُعتمد الطلب إلا بعد تحقق الإدارة من وصول المبلغ الصحيح.</div>'+
+ '<div class="deposit-verify"><label for="directUsdtTxid">رقم المعاملة (TxID / Signature)</label><input id="directUsdtTxid" class="field" dir="ltr" autocomplete="off" placeholder="'+escapeHtml(n.hint)+'"><button type="button" class="primary wide" id="submitDirectUsdtBtn" onclick="submitDirectUsdtPayment()">أرسلت المبلغ — إرسال إثبات الدفع</button></div>'+
+ '<p class="product-details-footnote">التسليم فوري عادةً، وقد يستغرق حتى 30 دقيقة في بعض الحالات. لا تحوّل المبلغ أكثر من مرة.</p><button type="button" class="secondary wide" onclick="closeModal()">إغلاق</button></div>';
+ openModal();
+}
+function chooseDirectUsdtNetwork(network){
+ if(!directUsdtNetworks[network])return;currentDirectUsdtNetwork=network;renderDirectUsdtPayment();
+}
+async function copyDirectUsdtAddress(){
+ const address=directUsdtNetworks[currentDirectUsdtNetwork]?.address||"";
+ try{await navigator.clipboard.writeText(address);showToast("تم نسخ عنوان الاستلام");}
+ catch(e){const x=document.createElement("textarea");x.value=address;x.style.position="fixed";x.style.opacity="0";document.body.appendChild(x);x.select();const ok=document.execCommand("copy");x.remove();showToast(ok?"تم نسخ عنوان الاستلام":"تعذر النسخ؛ انسخ العنوان يدوياً");}
+}
+async function submitDirectUsdtPayment(){
+ const o=currentDirectUsdtOrder,txid=(document.getElementById("directUsdtTxid")?.value||"").trim();
+ if(!o){showToast("لا يوجد طلب دفع نشط");return;}
+ if(txid.length<32||txid.length>160){showToast("أدخل رقم معاملة صحيحاً");return;}
+ const initData=window.Telegram?.WebApp?.initData||"";if(!initData){showToast("افتح المتجر من داخل تيليجرام");return;}
+ const button=document.getElementById("submitDirectUsdtBtn");if(button){button.disabled=true;button.textContent="جارٍ إرسال الإثبات…";}
+ try{
+  const r=await fetch("/api/orders/usdt",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({action:"submit",orderId:o.id,network:currentDirectUsdtNetwork,txid})});
+  const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إرسال إثبات الدفع");
+  closeModal();showToast("تم إرسال إثبات الدفع للمراجعة");
+  openInfo("تم تسجيل إثبات الدفع","رقم الطلب: <b>"+escapeHtml(d.orderNumber||o.order_number)+"</b><br>الحالة: <b>بانتظار التحقق من الدفع</b><br><br>سيتم اعتماد الطلب بعد التأكد من وصول المبلغ. التسليم فوري عادةً وقد يستغرق حتى 30 دقيقة.");
+  await loadOrders();go("orders");
+ }catch(e){showToast(e.message||"تعذر إرسال إثبات الدفع");if(button){button.disabled=false;button.textContent="أرسلت المبلغ — إرسال إثبات الدفع";}}
 }
 async function requestPurchase(id){
  const p=products.find(x=>x.id===id);if(!p)return;
@@ -544,8 +587,9 @@ async function requestPurchase(id){
 function filterOrders(f,el){orderFilter=f;document.querySelectorAll("#orderTabs .tab").forEach(b=>b.classList.remove("active"));el.classList.add("active");renderOrders()}
 function renderOrders(){
   const labels = {
-    awaiting_payment: "بانتظار الدفع",
-    pending: "بانتظار الدفع",
+    awaiting_payment: "بانتظار الدفع / التحقق",
+    pending: "بانتظار الدفع / التحقق",
+    paid: "تم تأكيد الدفع — جارٍ التجهيز",
     paid: "تم تأكيد الدفع",
     completed: "مكتمل وتم التسليم",
     cancelled: "ملغي",
