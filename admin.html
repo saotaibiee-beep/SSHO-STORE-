@@ -33,7 +33,7 @@ async function loadGift(){const box=$("giftList");box.innerHTML='<div class="emp
 async function loadDirectUsdtPayments(){
  const box=$("usdtList");box.innerHTML='<div class="empty">جارٍ تحميل دفعات USDT…</div>';
  try{
-  const d=await api("/api/admin/usdt-orders?status="+encodeURIComponent($("usdtFilter").value));
+  const d=await api("/api/admin/deposits?resource=usdt-orders&status="+encodeURIComponent($("usdtFilter").value));
   const rows=d.payments||[];
   if(!rows.length){box.innerHTML='<div class="empty">لا توجد دفعات في هذا التصنيف.</div>';return}
   box.innerHTML=rows.map(p=>{
@@ -52,7 +52,7 @@ async function loadUsdt(){await Promise.all([loadDirectUsdtPayments(),loadWallet
 async function loadWalletUsdtDeposits(){
  const box=$("walletUsdtList");box.innerHTML='<div class="empty">جارٍ تحميل شحنات المحفظة…</div>';
  try{
-  const d=await api("/api/admin/usdt-orders?resource=wallet-deposits&status="+encodeURIComponent($("walletUsdtFilter").value));
+  const d=await api("/api/admin/deposits?resource=wallet-deposits&status="+encodeURIComponent($("walletUsdtFilter").value));
   const rows=d.deposits||[];
   if(!rows.length){box.innerHTML='<div class="empty">لا توجد طلبات شحن في هذا التصنيف.</div>';return}
   box.innerHTML=rows.map(x=>'<article class="card"><div class="row"><strong>شحن محفظة #'+esc(x.id)+'</strong><span>'+esc(({pending_verification:"بانتظار المراجعة",paid:"تمت الإضافة",rejected:"مرفوض"}[x.status]||x.status))+'</span></div><div class="grid"><div class="field"><small>معرّف العميل</small>'+esc(x.telegram_user_id)+'</div><div class="field"><small>المبلغ</small>'+esc(x.amount)+' USDT</div><div class="field"><small>الشبكة</small>'+esc(x.method)+'</div><div class="field"><small>وقت الطلب</small>'+esc(x.created_at?new Date(x.created_at).toLocaleString("ar"):"—")+'</div></div><div class="muted" style="margin-top:12px">رقم المعاملة (تحقق منه يدوياً)</div><div class="code">'+esc(x.payment_reference||"لا يوجد")+'</div><button type="button" data-copy-value="'+esc(x.payment_reference||"")+'">نسخ TxID</button>'+(x.status==="pending_verification"?'<div class="actions"><button class="approve" data-wallet-usdt-review="'+Number(x.id)+'" data-review-status="confirmed">تأكيد التحويل وإضافة الرصيد</button><button class="reject" data-wallet-usdt-review="'+Number(x.id)+'" data-review-status="rejected">رفض الطلب</button></div>':"")+'</article>').join("");
@@ -61,13 +61,13 @@ async function loadWalletUsdtDeposits(){
 async function reviewWalletUsdt(depositId,decision){
  if(decision==="confirmed"&&!confirm("هل تحققت من وصول المبلغ الصحيح على الشبكة المحددة؟ سيتم إضافة الرصيد إلى محفظة العميل."))return;
  if(decision==="rejected"&&!confirm("تأكيد رفض طلب شحن المحفظة؟"))return;
- try{const d=await api("/api/admin/usdt-orders?resource=wallet-deposits","PATCH",{depositId:Number(depositId),decision});setStatus(d.message||"تم حفظ مراجعة الشحن.");await loadWalletUsdtDeposits();if(typeof window.refreshSSHOWalletBalance==="function")window.refreshSSHOWalletBalance()}catch(e){setStatus(e.message,true)}
+ try{const d=await api("/api/admin/deposits?resource=wallet-deposits","PATCH",{depositId:Number(depositId),decision});setStatus(d.message||"تم حفظ مراجعة الشحن.");await loadWalletUsdtDeposits();if(typeof window.refreshSSHOWalletBalance==="function")window.refreshSSHOWalletBalance()}catch(e){setStatus(e.message,true)}
 }
 \nasync function reviewUsdt(paymentId,decision){
  const note=$("usdt-note-"+paymentId)?.value||"";
  if(decision==="confirmed"&&!confirm("هل تحققت من وصول المبلغ الصحيح إلى عنوان المتجر على الشبكة المحددة؟ سيتم اعتماد الطلب وتسجيله كمدفوع."))return;
  if(decision==="rejected"&&!confirm("تأكيد رفض إثبات الدفع؟"))return;
- try{const d=await api("/api/admin/usdt-orders","PATCH",{paymentId,decision,note});setStatus(d.message||"تم حفظ المراجعة.");await loadUsdt()}catch(e){setStatus(e.message,true)}
+ try{const d=await api("/api/admin/deposits?resource=usdt-orders","PATCH",{paymentId,decision,note});setStatus(d.message||"تم حفظ المراجعة.");await loadUsdt()}catch(e){setStatus(e.message,true)}
 }
 \nasync function loadProducts(){
  const box=$("productsList");box.innerHTML='<div class="empty">جارٍ تحميل المنتجات…</div>';
