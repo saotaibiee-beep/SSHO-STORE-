@@ -48,7 +48,7 @@ export default async function handler(req, res) {
   }
 
   const body = req.body || {};
-  const baseUrl = supabaseUrl.replace(/\\/+$/, "");
+  const baseUrl = supabaseUrl.replace(/\/+$/, "");
   const headers = { "Content-Type": "application/json", apikey: serviceKey, Authorization: "Bearer " + serviceKey };
 
   if (body.action === "submit_usdt") {
