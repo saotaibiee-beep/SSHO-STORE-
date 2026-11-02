@@ -21,6 +21,14 @@ export default async function handler(req, res) {
     if (!roleRes.ok) return res.status(502).json({ error: "تعذر التحقق من صلاحيات الإدارة" });
     if (!Array.isArray(roles) || !roles.some(r => ["owner", "admin"].includes(r.role))) return res.status(403).json({ error: "ليس لديك صلاحية إدارة الطلبات" });
 
+    if (req.query?.resource === "wallet-deposits" && req.method === "GET") {
+      const status = ["pending_verification", "paid", "rejected"].includes(String(req.query?.status)) ? String(req.query.status) : "pending_verification";
+      const dRes = await fetch(`${base}/rest/v1/deposits?status=eq.${status}&method=in.(USDT%20BEP20,USDT%20TRC20,USDT%20ERC20,USDT%20SOL)&select=id,telegram_user_id,amount,method,payment_reference,status,created_at&order=created_at.desc&limit=100`, { headers });
+      const deposits = await dRes.json().catch(() => []);
+      if (!dRes.ok || !Array.isArray(deposits)) return res.status(502).json({ error: "تعذر تحميل طلبات شحن المحفظة" });
+      return res.status(200).json({ deposits });
+    }
+
     if (req.method === "GET") {
       const status = ["submitted", "under_review", "confirmed", "rejected"].includes(String(req.query?.status)) ? String(req.query.status) : "submitted";
       const pRes = await fetch(`${base}/rest/v1/payments?status=eq.${status}&network=like.USDT*&select=id,order_id,network,asset,amount,txid,receiving_address,status,verification_status,verification_notes,submitted_by,submitted_at&order=submitted_at.desc&limit=100`, { headers });
@@ -35,6 +43,38 @@ export default async function handler(req, res) {
         orderMap = Object.fromEntries(orders.map(o => [o.id, o]));
       }
       return res.status(200).json({ payments: payments.map(p => ({ ...p, order: orderMap[p.order_id] || null })) });
+    }
+
+    if (req.query?.resource === "wallet-deposits") {
+      const depositId = Number(req.body?.depositId);
+      const decision = String(req.body?.decision || "");
+      if (!Number.isSafeInteger(depositId) || depositId <= 0 || !["confirmed", "rejected"].includes(decision)) {
+        return res.status(400).json({ error: "بيانات مراجعة الشحن غير صالحة" });
+      }
+      const rpc = await fetch(`${base}/rest/v1/rpc/review_usdt_wallet_deposit`, {
+        method: "POST", headers,
+        body: JSON.stringify({ p_deposit_id: depositId, p_decision: decision, p_admin_telegram_id: user.id })
+      });
+      const result = await rpc.json().catch(() => ({}));
+      if (!rpc.ok) {
+        const msg = String(result?.message || "");
+        if (msg.includes("admin_forbidden")) return res.status(403).json({ error: "ليس لديك صلاحية اعتماد الشحن" });
+        if (msg.includes("deposit_not_pending_review")) return res.status(409).json({ error: "طلب الشحن ليس بانتظار المراجعة." });
+        console.error("Review USDT wallet deposit failed", rpc.status, msg.slice(0, 200));
+        return res.status(502).json({ error: "تعذر حفظ مراجعة الشحن" });
+      }
+      const dr = await fetch(`${base}/rest/v1/deposits?id=eq.${depositId}&select=telegram_user_id,amount,status&limit=1`, { headers });
+      const rows = await dr.json().catch(() => []);
+      if (rows?.[0]) {
+        const msg = decision === "confirmed"
+          ? `تم اعتماد شحن محفظتك عبر USDT\\nرقم الشحن: ${depositId}\\nالمبلغ المضاف: ${rows[0].amount} USDT\\nيمكنك الآن الشراء من رصيد المحفظة.`
+          : `تعذر اعتماد طلب شحن USDT رقم ${depositId}. يرجى التواصل مع الدعم قبل إعادة التحويل.`;
+        await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: rows[0].telegram_user_id, text: msg, disable_web_page_preview: true })
+        }).catch(() => null);
+      }
+      return res.status(200).json({ ok: true, result, message: decision === "confirmed" ? "تم اعتماد الشحن وإضافة الرصيد للمحفظة." : "تم رفض طلب الشحن." });
     }
 
     const paymentId = String(req.body?.paymentId || "");
