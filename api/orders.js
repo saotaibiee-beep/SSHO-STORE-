@@ -200,13 +200,13 @@ export default async function handler(req, res) {
       const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || "غير متوفر";
       const username = user.username ? `@${user.username}` : "غير متوفر (لا يوجد Username)";
       const text =
-        `📩 <b>رسالة دعم جديدة — SSHO STORE</b>\\n\\n` +
-        `👤 <b>اسم العميل:</b> ${esc(fullName)}\\n` +
-        `🆔 <b>معرّف تيليجرام:</b> <code>${user.id}</code>\\n` +
-        `🔗 <b>Username:</b> ${esc(username)}\\n` +
-        `🧾 <b>رقم الطلب:</b> ${esc(orderReference.trim() || "غير مذكور")}\\n` +
-        `📌 <b>موضوع المشكلة:</b> ${esc(topic.trim())}\\n\\n` +
-        `📝 <b>تفاصيل المشكلة:</b>\\n${esc(message.trim())}\\n\\n` +
+        `📩 <b>رسالة دعم جديدة — SSHO STORE</b>\n\n` +
+        `👤 <b>اسم العميل:</b> ${esc(fullName)}\n` +
+        `🆔 <b>معرّف تيليجرام:</b> <code>${user.id}</code>\n` +
+        `🔗 <b>Username:</b> ${esc(username)}\n` +
+        `🧾 <b>رقم الطلب:</b> ${esc(orderReference.trim() || "غير مذكور")}\n` +
+        `📌 <b>موضوع المشكلة:</b> ${esc(topic.trim())}\n\n` +
+        `📝 <b>تفاصيل المشكلة:</b>\n${esc(message.trim())}\n\n` +
         `🎫 <b>رقم المتابعة:</b> <code>${saved.id}</code>`;
       const sent = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST", headers: { "Content-Type": "application/json" },
