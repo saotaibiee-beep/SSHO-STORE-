@@ -143,6 +143,90 @@ export default async function handler(req, res) {
     }
   }
 
+  if (req.body?.action === "support") {
+    const { requestKey, topic, orderReference, message } = req.body || {};
+    if (typeof requestKey !== "string" || !/^[a-zA-Z0-9_-]{12,100}$/.test(requestKey) ||
+        typeof topic !== "string" || !topic.trim() || topic.length > 120 ||
+        typeof orderReference !== "string" || orderReference.length > 80 ||
+        typeof message !== "string" || message.trim().length < 3 || message.length > 1200) {
+      return res.status(400).json({ error: "يرجى إدخال موضوع الرسالة وتفاصيل صحيحة." });
+    }
+    const tableUrl = `${baseUrl}/rest/v1/support_requests`;
+    const query = new URLSearchParams({ request_key: `eq.${requestKey}`, select: "id,telegram_user_id,delivery_status", limit: "1" });
+    try {
+      const existingResponse = await fetch(`${tableUrl}?${query}`, { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } });
+      const existing = await existingResponse.json().catch(() => []);
+      let saved;
+      if (existingResponse.ok && Array.isArray(existing) && existing.length) {
+        saved = existing[0];
+        if (Number(saved.telegram_user_id) !== Number(user.id)) return res.status(409).json({ error: "مفتاح الطلب مستخدم مسبقاً." });
+        if (saved.delivery_status === "sent") return res.status(200).json({ delivered: true, ticketId: saved.id });
+      } else {
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || "عميل تيليجرام";
+        const insertResponse = await fetch(tableUrl, {
+          method: "POST",
+          headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json", Prefer: "return=representation" },
+          body: JSON.stringify([{
+            request_key: requestKey, telegram_user_id: user.id, customer_name: fullName,
+            customer_username: user.username, order_reference: orderReference.trim(),
+            topic: topic.trim(), message: message.trim(), delivery_status: "pending"
+          }])
+        });
+        const inserted = await insertResponse.json().catch(() => null);
+        if (!insertResponse.ok || !Array.isArray(inserted) || !inserted[0]) {
+          console.error("Support request persistence failed", insertResponse.status);
+          return res.status(502).json({ error: "تعذر حفظ رسالة الدعم. حاول مرة أخرى." });
+        }
+        saved = inserted[0];
+      }
+
+      const adminsResponse = await fetch(`${baseUrl}/rest/v1/admin_roles?active=eq.true&role=in.(owner,admin)&select=telegram_id,role&limit=10`, {
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` }
+      });
+      const admins = await adminsResponse.json().catch(() => []);
+      if (!adminsResponse.ok || !Array.isArray(admins) || !admins.length) throw new Error("لا يوجد حساب دعم نشط.");
+      let recipient = null;
+      for (const admin of admins) {
+        const check = await fetch(`https://api.telegram.org/bot${botToken}/getChat?chat_id=${encodeURIComponent(admin.telegram_id)}`);
+        const chat = await check.json().catch(() => null);
+        if (check.ok && chat?.ok && String(chat.result?.username || "").toLowerCase() === "abnasi") {
+          recipient = admin.telegram_id;
+          break;
+        }
+      }
+      if (!recipient) throw new Error("تعذر التحقق من أن حساب الإدارة النشط هو @abnasi.");
+
+      const esc = value => String(value ?? "").replace(/[&<>"]/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+      const fullName = [user.first_name, user.last_name].filter(Boolean).join(" ").trim() || "غير متوفر";
+      const username = user.username ? `@${user.username}` : "غير متوفر (لا يوجد Username)";
+      const text =
+        `📩 <b>رسالة دعم جديدة — SSHO STORE</b>\\n\\n` +
+        `👤 <b>اسم العميل:</b> ${esc(fullName)}\\n` +
+        `🆔 <b>معرّف تيليجرام:</b> <code>${user.id}</code>\\n` +
+        `🔗 <b>Username:</b> ${esc(username)}\\n` +
+        `🧾 <b>رقم الطلب:</b> ${esc(orderReference.trim() || "غير مذكور")}\\n` +
+        `📌 <b>موضوع المشكلة:</b> ${esc(topic.trim())}\\n\\n` +
+        `📝 <b>تفاصيل المشكلة:</b>\\n${esc(message.trim())}\\n\\n` +
+        `🎫 <b>رقم المتابعة:</b> <code>${saved.id}</code>`;
+      const sent = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: recipient, text, parse_mode: "HTML", disable_web_page_preview: true })
+      });
+      const result = await sent.json().catch(() => null);
+      if (!sent.ok || !result?.ok) throw new Error("تعذر تسليم الرسالة إلى دعم تيليجرام.");
+
+      await fetch(`${tableUrl}?id=eq.${encodeURIComponent(saved.id)}`, {
+        method: "PATCH",
+        headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}`, "Content-Type": "application/json", Prefer: "return=minimal" },
+        body: JSON.stringify({ delivery_status: "sent", telegram_message_id: result.result?.message_id ?? null, delivered_at: new Date().toISOString(), delivery_error: null })
+      });
+      return res.status(200).json({ delivered: true, ticketId: saved.id });
+    } catch (error) {
+      console.error("Support delivery failed", error?.message);
+      return res.status(502).json({ delivered: false, error: "تم حفظ طلبك، لكن تعذر تأكيد وصوله إلى الدعم الآن. حاول مجدداً؛ بيانات رسالتك محفوظة." });
+    }
+  }
+
   const { productId, idempotencyKey } = req.body || {};
 
   if (
