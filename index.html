@@ -546,7 +546,6 @@ function showProduct(id){
     <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')"><span>شراء من الرصيد</span><strong>${escapeHtml(currency)} ${money(p.price)}</strong></button>
     <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')"><span>شراء عبر USDT</span><strong>${money(p.price)} USDT</strong></button>
    </div>
-   <p class="product-details-footnote">يتم تأكيد توفر المنتج والسعر من الخادم عند إتمام الطلب.</p>
   </div>`;
  openModal();
 }
