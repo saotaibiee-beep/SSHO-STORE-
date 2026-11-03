@@ -90,6 +90,10 @@ export function verifyTelegramInitData(initData, botToken) {
         typeof user.first_name === "string"
           ? user.first_name
           : "",
+      last_name:
+        typeof user.last_name === "string"
+          ? user.last_name
+          : "",
       username:
         typeof user.username === "string"
           ? user.username
