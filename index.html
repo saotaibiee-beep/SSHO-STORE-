@@ -18,6 +18,13 @@
       if (!tg) return;
       if (typeof tg.ready === "function") tg.ready();
       if (typeof tg.expand === "function") tg.expand();
+      // Use the native Telegram Mini App fullscreen mode when supported.
+      // Older Telegram clients safely continue in the expanded view.
+      try {
+        if (typeof tg.requestFullscreen === "function") tg.requestFullscreen();
+      } catch (fullscreenError) {
+        console.info("[SSHO STORE] Fullscreen is unavailable in this Telegram client.");
+      }
       try { tg.setHeaderColor("#0b0912"); } catch (_) {}
       try { tg.setBackgroundColor("#0b0912"); } catch (_) {}
     } catch (error) { console.warn("[SSHO STORE] Telegram initialization:", error); }
