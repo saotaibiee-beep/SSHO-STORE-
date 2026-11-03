@@ -1048,15 +1048,29 @@ function contactSupport(){
  '<button class="secondary wide" style="margin-top:10px" onclick="closeModal()">إغلاق</button>';
  openModal();
 }
-function sendSupportRequest(){
+async function sendSupportRequest(){
+ const button=document.querySelector('#modalBody button[onclick="sendSupportRequest()"]');
  const topic=document.querySelector('input[name="supportTopic"]:checked')?.value||"سؤال عام";
  const order=(document.getElementById("supportOrderRef")?.value||"").trim();
  const message=(document.getElementById("supportMessage")?.value||"").trim();
- const body="الموضوع: "+topic+"\\nرقم الطلب: "+(order||"غير متوفر")+"\\nالتفاصيل: "+(message||"لم تتم إضافة تفاصيل");
- const username=window.SSHO_SUPPORT_USERNAME||"";
- if(username){const url="https://t.me/"+username.replace(/^@/,"")+"?text="+encodeURIComponent(body);if(window.Telegram?.WebApp?.openTelegramLink)Telegram.WebApp.openTelegramLink(url);else window.open(url,"_blank");return;}
- if(navigator.clipboard?.writeText){navigator.clipboard.writeText(body).then(()=>showToast("تم نسخ رسالة الدعم. أرسلها عبر قناة دعم المتجر."),()=>showToast("تعذر النسخ؛ انسخ تفاصيل الطلب يدوياً."));}
- else showToast("يرجى نسخ تفاصيل الطلب والتواصل عبر قناة دعم المتجر.");
+ const tg=window.Telegram?.WebApp;
+ const initData=tg?.initData||"";
+ if(!initData){showToast("افتح المتجر من خلال بوت SSHO STORE لإرسال رسالة الدعم.");return;}
+ if(!message){showToast("اكتب تفاصيل المشكلة أولاً.");document.getElementById("supportMessage")?.focus();return;}
+ if(button){button.disabled=true;button.textContent="جارٍ إرسال رسالتك...";}
+ try{
+  const requestKey=(window.crypto?.randomUUID?.()||("support-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+  const response=await fetch("/api/support",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({requestKey,topic,orderReference:order,message})});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.delivered){
+   throw new Error(result.error||"تعذر تأكيد وصول الرسالة. تم الاحتفاظ بطلبك إن كان قد حُفظ؛ حاول الإرسال مجدداً.");
+  }
+  document.getElementById("modalBody").innerHTML='<div style="text-align:center;padding:24px 10px"><div style="font-size:48px;margin-bottom:12px">✓</div><h3 style="margin-bottom:8px">تم إرسال رسالتك بنجاح</h3><p class="subtext" style="line-height:1.9">وصلت رسالتك إلى فريق دعم SSHO STORE. سنراجع التفاصيل ونتواصل معك عبر تيليجرام عند الحاجة.</p><p class="subtext" style="font-size:12px">رقم المتابعة: '+String(result.ticketId||"").replace(/[<>&"]/g,"")+'</p><button class="primary wide" style="margin-top:16px" onclick="closeModal()">حسناً</button></div>';
+  document.getElementById("modalTitle").textContent="تم استلام طلب الدعم";
+ }catch(error){
+  showToast(error?.message||"تعذر إرسال الرسالة. حاول مرة أخرى.");
+  if(button){button.disabled=false;button.textContent="إرسال";}
+ }
 }
 function showToast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>el.classList.remove("show"),2600)}
 function updateStats(){document.getElementById("ordersCount").textContent=orders.length;document.getElementById("purchasesCount").textContent=orders.filter(o=>o.status==="completed").length}
