@@ -1044,7 +1044,7 @@ function contactSupport(){
  '<label style="display:flex;gap:10px;align-items:center;padding:14px;border:1px solid var(--border,#29364a);border-radius:16px;background:rgba(18,31,47,.72)"><input type="radio" name="supportTopic" value="سؤال عام"> <span><b>سؤال عام</b></span></label></div>'+
  '<label style="display:block;font-weight:800;margin-bottom:7px" for="supportOrderRef">رقم الطلب (اختياري)</label><input id="supportOrderRef" class="field" placeholder="مثال: SS-..." maxlength="80" style="width:100%;margin-bottom:12px">'+
  '<label style="display:block;font-weight:800;margin-bottom:7px" for="supportMessage">تفاصيل المشكلة</label><textarea id="supportMessage" class="field" maxlength="1200" rows="4" placeholder="اكتب المشكلة باختصار..." style="width:100%;resize:vertical"></textarea>'+
- '<button class="primary wide" style="margin-top:14px" onclick="sendSupportRequest()">متابعة التواصل</button>'+
+ '<button class="primary wide" style="margin-top:14px" onclick="sendSupportRequest()">إرسال</button>'+
  '<button class="secondary wide" style="margin-top:10px" onclick="closeModal()">إغلاق</button>';
  openModal();
 }
@@ -1059,13 +1059,14 @@ async function sendSupportRequest(){
  if(!message){showToast("اكتب تفاصيل المشكلة أولاً.");document.getElementById("supportMessage")?.focus();return;}
  if(button){button.disabled=true;button.textContent="جارٍ إرسال رسالتك...";}
  try{
-  const requestKey=(window.crypto?.randomUUID?.()||("support-"+Date.now()+"-"+Math.random().toString(36).slice(2)));
+  const requestKey=window._sshoSupportRequestKey||(window._sshoSupportRequestKey=(window.crypto?.randomUUID?.()||("support-"+Date.now()+"-"+Math.random().toString(36).slice(2))));
   const response=await fetch("/api/support",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({requestKey,topic,orderReference:order,message})});
   const result=await response.json().catch(()=>({}));
   if(!response.ok||!result.delivered){
    throw new Error(result.error||"تعذر تأكيد وصول الرسالة. تم الاحتفاظ بطلبك إن كان قد حُفظ؛ حاول الإرسال مجدداً.");
   }
   document.getElementById("modalBody").innerHTML='<div style="text-align:center;padding:24px 10px"><div style="font-size:48px;margin-bottom:12px">✓</div><h3 style="margin-bottom:8px">تم إرسال رسالتك بنجاح</h3><p class="subtext" style="line-height:1.9">وصلت رسالتك إلى فريق دعم SSHO STORE. سنراجع التفاصيل ونتواصل معك عبر تيليجرام عند الحاجة.</p><p class="subtext" style="font-size:12px">رقم المتابعة: '+String(result.ticketId||"").replace(/[<>&"]/g,"")+'</p><button class="primary wide" style="margin-top:16px" onclick="closeModal()">حسناً</button></div>';
+  window._sshoSupportRequestKey=null;
   document.getElementById("modalTitle").textContent="تم استلام طلب الدعم";
  }catch(error){
   showToast(error?.message||"تعذر إرسال الرسالة. حاول مرة أخرى.");
