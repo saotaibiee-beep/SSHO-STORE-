@@ -6,6 +6,26 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
 
+
+async function walletCheckout(req,res){
+ const {productId,idempotencyKey}=req.body||{};
+ if(!uuid.test(String(productId||""))||!keyPattern.test(String(idempotencyKey||"")))return json(res,400,{error:"Invalid checkout request"});
+ const base=(process.env.SUPABASE_URL||"").replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const auth=String(req.headers.authorization||"");
+ if(!auth.startsWith("Bearer "))return json(res,401,{error:"Sign in to use your wallet"});
+ if(!base||!key)return json(res,503,{error:"Service unavailable"});
+ const userRes=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:auth}});
+ if(!userRes.ok)return json(res,401,{error:"Invalid session"});
+ const user=await userRes.json();
+ if(!uuid.test(String(user.id||"")))return json(res,401,{error:"Invalid session"});
+ try{
+  const r=await fetch(base+"/rest/v1/rpc/pay_store_order_from_wallet",{method:"POST",headers:{apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"},body:JSON.stringify({p_customer_id:user.id,p_product_id:productId,p_idempotency_key:idempotencyKey})});
+  const rows=await r.json().catch(()=>[]);
+  if(!r.ok)return json(res,409,{error:"Insufficient wallet balance or unavailable product"});
+  return json(res,200,{success:true,orderId:rows?.[0]?.order_id,orderNumber:rows?.[0]?.order_number,balance:rows?.[0]?.balance});
+ }catch(e){return json(res,502,{error:"Wallet checkout unavailable"});}
+}
+
 async function createSupportRequest(req,res){
  const {name,email,topic,message,orderReference}=req.body||{};
  if(!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(String(email||""))||String(email).length>254||String(name||"").trim().length<2||String(name).length>100||String(topic||"").length<3||String(topic).length>120||String(message||"").length<10||String(message).length>1200||String(orderReference||"").length>80)return json(res,400,{error:"تحقق من بيانات نموذج الدعم"});
@@ -159,6 +179,7 @@ async function createPayPalOrder(req, res) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'POST' && req.body?.action === 'wallet_checkout') return walletCheckout(req, res);
   if (req.method === 'POST' && req.body?.action === 'support') return createSupportRequest(req, res);
   if (req.method === 'POST' && req.body?.action === 'capture') return capturePayPalOrder(req, res);
   if (req.method === 'POST') return createPayPalOrder(req, res);
