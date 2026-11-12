@@ -5,6 +5,26 @@ const keyPattern = /^[A-Za-z0-9_-]{16,100}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 
+
+async function createSupportRequest(req,res){
+ const {name,email,topic,message,orderReference}=req.body||{};
+ if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(email||""))||String(email).length>254||String(name||"").trim().length<2||String(name).length>100||String(topic||"").length<3||String(topic).length>120||String(message||"").length<10||String(message).length>1200||String(orderReference||"").length>80)return json(res,400,{error:"تحقق من بيانات نموذج الدعم"});
+ const base=(process.env.SUPABASE_URL||"").replace(/\\/+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ if(!base||!key)return json(res,503,{error:"Service unavailable"});
+ const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
+ const normalized=String(email).trim().toLowerCase();
+ const since=new Date(Date.now()-300000).toISOString();
+ try{
+  const check=await fetch(base+"/rest/v1/support_requests?customer_email=eq."+encodeURIComponent(normalized)+"&created_at=gte."+encodeURIComponent(since)+"&select=id&limit=1",{headers});
+  if(!check.ok)return json(res,502,{error:"Support service unavailable"});
+  if((await check.json()).length)return json(res,429,{error:"يرجى الانتظار خمس دقائق قبل إرسال طلب آخر"});
+  const r=await fetch(base+"/rest/v1/support_requests",{method:"POST",headers:{...headers,Prefer:"return=representation"},body:JSON.stringify({request_key:crypto.randomUUID().replace(/-/g,""),customer_name:String(name).trim(),customer_email:normalized,topic:String(topic).trim(),message:String(message).trim(),order_reference:String(orderReference||"").trim(),delivery_status:"pending"})});
+  const data=await r.json().catch(()=>[]);
+  if(!r.ok||!data[0])return json(res,502,{error:"تعذر حفظ طلب الدعم"});
+  return json(res,201,{ticketId:data[0].id});
+ }catch(e){return json(res,502,{error:"Support service unavailable"});}
+}
+
 async function capturePayPalOrder(req,res) {
  if(process.env.VERCEL_ENV==="production") return json(res,403,{error:"Sandbox only"});
  const {orderId,paypalOrderId}=req.body||{};
@@ -139,6 +159,7 @@ async function createPayPalOrder(req, res) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'POST' && req.body?.action === 'support') return createSupportRequest(req, res);
   if (req.method === 'POST' && req.body?.action === 'capture') return capturePayPalOrder(req, res);
   if (req.method === 'POST') return createPayPalOrder(req, res);
   if (req.method !== "GET") {
