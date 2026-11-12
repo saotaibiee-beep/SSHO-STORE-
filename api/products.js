@@ -9,7 +9,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 async function createSupportRequest(req,res){
  const {name,email,topic,message,orderReference}=req.body||{};
  if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(email||""))||String(email).length>254||String(name||"").trim().length<2||String(name).length>100||String(topic||"").length<3||String(topic).length>120||String(message||"").length<10||String(message).length>1200||String(orderReference||"").length>80)return json(res,400,{error:"تحقق من بيانات نموذج الدعم"});
- const base=(process.env.SUPABASE_URL||"").replace(/\\/+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const base=(process.env.SUPABASE_URL||"").replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!base||!key)return json(res,503,{error:"Service unavailable"});
  const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
  const normalized=String(email).trim().toLowerCase();
@@ -29,7 +29,7 @@ async function capturePayPalOrder(req,res) {
  if(process.env.VERCEL_ENV==="production") return json(res,403,{error:"Sandbox only"});
  const {orderId,paypalOrderId}=req.body||{};
  if(!uuid.test(String(orderId||""))||!/^[-A-Z0-9]{8,40}$/i.test(String(paypalOrderId||""))) return json(res,400,{error:"Invalid order"});
- const base=(process.env.SUPABASE_URL||"").replace(/\\/+$/,""), key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const base=(process.env.SUPABASE_URL||"").replace(/[/]+$/,""), key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  const clientId=process.env.PAYPAL_CLIENT_ID, secret=process.env.PAYPAL_CLIENT_SECRET;
  if(!base||!key||!clientId||!secret)return json(res,503,{error:"Missing configuration"});
  const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
