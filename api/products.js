@@ -8,7 +8,7 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 async function createSupportRequest(req,res){
  const {name,email,topic,message,orderReference}=req.body||{};
- if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(String(email||""))||String(email).length>254||String(name||"").trim().length<2||String(name).length>100||String(topic||"").length<3||String(topic).length>120||String(message||"").length<10||String(message).length>1200||String(orderReference||"").length>80)return json(res,400,{error:"تحقق من بيانات نموذج الدعم"});
+ if(!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(String(email||""))||String(email).length>254||String(name||"").trim().length<2||String(name).length>100||String(topic||"").length<3||String(topic).length>120||String(message||"").length<10||String(message).length>1200||String(orderReference||"").length>80)return json(res,400,{error:"تحقق من بيانات نموذج الدعم"});
  const base=(process.env.SUPABASE_URL||"").replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
  if(!base||!key)return json(res,503,{error:"Service unavailable"});
  const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
