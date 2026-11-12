@@ -13,6 +13,25 @@ const METHODS = new Set([
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
+
+  if(req.method==="POST"&&req.body?.action==="approve"){
+    const base=process.env.SUPABASE_URL?.replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const auth=String(req.headers.authorization||"");
+    if(!base||!key)return res.status(503).json({error:"Service unavailable"});
+    if(!auth.startsWith("Bearer "))return res.status(401).json({error:"Authentication required"});
+    const u=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:auth}});
+    if(!u.ok)return res.status(401).json({error:"Invalid session"});
+    const user=await u.json();
+    const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
+    const admin=await fetch(base+"/rest/v1/store_admins?user_id=eq."+encodeURIComponent(user.id)+"&active=eq.true&select=user_id&limit=1",{headers});
+    if(!admin.ok||(await admin.json()).length!==1)return res.status(403).json({error:"Admin access required"});
+    const depositId=Number(req.body.depositId);
+    if(!Number.isSafeInteger(depositId)||depositId<1)return res.status(400).json({error:"Invalid deposit"});
+    const r=await fetch(base+"/rest/v1/rpc/approve_customer_deposit",{method:"POST",headers,body:JSON.stringify({p_deposit_id:depositId,p_admin_id:user.id})});
+    if(!r.ok)return res.status(409).json({error:"Deposit cannot be approved"});
+    return res.status(200).json({approved:true});
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     return res.status(405).json({ error: "Method not allowed" });
