@@ -106,6 +106,11 @@ async function createPayPalOrder(req, res) {
       },
       body: JSON.stringify({
         intent: "CAPTURE",
+        payment_source: { paypal: { experience_context: {
+          user_action: "PAY_NOW",
+          return_url: "https://" + process.env.VERCEL_URL + "/",
+          cancel_url: "https://" + process.env.VERCEL_URL + "/?checkout=cancelled"
+        } } },
         purchase_units: [{
           reference_id: order.order_id,
           custom_id: order.order_id,
