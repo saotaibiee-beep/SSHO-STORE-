@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!botToken || !supabaseUrl || !serviceKey) {
+  if (!supabaseUrl || !serviceKey) {
     return res.status(503).json({
       error: "Server configuration incomplete"
     });
@@ -30,22 +30,15 @@ export default async function handler(req, res) {
 
   const authorization = req.headers.authorization || "";
 
-  if (!authorization.startsWith("tma ")) {
-    return res.status(401).json({
-      error: "Telegram authorization required"
-    });
+  let telegramId=null, customerId=null;
+  if (authorization.startsWith("tma ") && botToken) {
+    const user=verifyTelegramInitData(authorization.slice(4),botToken);
+    if(user)telegramId=user.id;
+  } else if(authorization.startsWith("Bearer ")){
+    const response=await fetch(supabaseUrl.replace(/\/+$/,"")+"/auth/v1/user",{headers:{apikey:serviceKey,Authorization:authorization}});
+    if(response.ok){const user=await response.json();customerId=user.id;}
   }
-
-  const user = verifyTelegramInitData(
-    authorization.slice(4),
-    botToken
-  );
-
-  if (!user) {
-    return res.status(401).json({
-      error: "Invalid Telegram session"
-    });
-  }
+  if(!telegramId&&!customerId)return res.status(401).json({error:"Login required"});
 
   const body = req.body || {};
   const amount = Number(body.amount);
@@ -77,7 +70,8 @@ export default async function handler(req, res) {
           Prefer: "return=representation"
         },
         body: JSON.stringify({
-          telegram_user_id: user.id,
+          telegram_user_id: telegramId,
+          customer_id: customerId,
           amount,
           method,
           status: "awaiting_payment"
