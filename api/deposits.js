@@ -14,6 +14,25 @@ export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
 
+
+  if(req.method==="POST"&&req.body?.action==="submit_reference"){
+    const base=process.env.SUPABASE_URL?.replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const auth=String(req.headers.authorization||"");
+    if(!base||!key)return res.status(503).json({error:"Service unavailable"});
+    if(!auth.startsWith("Bearer "))return res.status(401).json({error:"Login required"});
+    const u=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:auth}});
+    if(!u.ok)return res.status(401).json({error:"Invalid session"});
+    const user=await u.json();
+    const depositId=Number(req.body.depositId),reference=String(req.body.reference||"").trim();
+    if(!Number.isSafeInteger(depositId)||depositId<1||reference.length<4||reference.length>150)return res.status(400).json({error:"Invalid transfer reference"});
+    const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json",Prefer:"return=representation"};
+    const query="/rest/v1/deposits?id=eq."+depositId+"&customer_id=eq."+encodeURIComponent(user.id)+"&status=eq.awaiting_payment&select=id";
+    const r=await fetch(base+query,{method:"PATCH",headers,body:JSON.stringify({customer_reference:reference,status:"under_review"})});
+    const rows=await r.json().catch(()=>[]);
+    if(!r.ok||!rows.length)return res.status(409).json({error:"Deposit cannot be updated"});
+    return res.status(200).json({submitted:true});
+  }
+
   if(req.method==="POST"&&req.body?.action==="approve"){
     const base=process.env.SUPABASE_URL?.replace(/[/]+$/,""),key=process.env.SUPABASE_SERVICE_ROLE_KEY;
     const auth=String(req.headers.authorization||"");
