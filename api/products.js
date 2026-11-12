@@ -4,6 +4,53 @@ const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const keyPattern = /^[A-Za-z0-9_-]{16,100}$/;
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+
+async function capturePayPalOrder(req,res) {
+ if(process.env.VERCEL_ENV==="production") return json(res,403,{error:"Sandbox only"});
+ const {orderId,paypalOrderId}=req.body||{};
+ if(!uuid.test(String(orderId||""))||!/^[-A-Z0-9]{8,40}$/i.test(String(paypalOrderId||""))) return json(res,400,{error:"Invalid order"});
+ const base=(process.env.SUPABASE_URL||"").replace(/\\/+$/,""), key=process.env.SUPABASE_SERVICE_ROLE_KEY;
+ const clientId=process.env.PAYPAL_CLIENT_ID, secret=process.env.PAYPAL_CLIENT_SECRET;
+ if(!base||!key||!clientId||!secret)return json(res,503,{error:"Missing configuration"});
+ const headers={apikey:key,Authorization:"Bearer "+key,"Content-Type":"application/json"};
+ try {
+  const found=await fetch(base+"/rest/v1/orders?id=eq."+encodeURIComponent(orderId)+"&paypal_order_id=eq."+encodeURIComponent(paypalOrderId)+"&checkout_method=eq.paypal&select=id,order_number,unit_price,status,customer_id,guest_email",{headers});
+  if(!found.ok)return json(res,502,{error:"Order lookup failed"});
+  const orders=await found.json();if(orders.length!==1)return json(res,404,{error:"Order not found"});
+  const order=orders[0];
+  let verified=false;
+  const auth=String(req.headers.authorization||"");
+  if(order.customer_id&&auth.startsWith("Bearer ")){
+   const u=await fetch(base+"/auth/v1/user",{headers:{apikey:key,Authorization:auth}});
+   if(u.ok){const person=await u.json();verified=person.id===order.customer_id;}
+  }
+  if(!verified&&order.guest_email){
+   // Guest capture is allowed only with the original unguessable checkout key.
+   const checkoutKey=String(req.body?.idempotencyKey||"");
+   if(keyPattern.test(checkoutKey)){
+    const v=await fetch(base+"/rest/v1/orders?id=eq."+encodeURIComponent(orderId)+"&idempotency_key=eq."+encodeURIComponent(checkoutKey)+"&select=id",{headers});
+    verified=v.ok&&(await v.json()).length===1;
+   }
+  }
+  if(!verified)return json(res,403,{error:"Checkout authorization required"});
+  if(order.status==="paid"||order.status==="completed")return json(res,200,{success:true,orderId,status:order.status});
+  if(order.status!=="awaiting_payment")return json(res,409,{error:"Order is not payable"});
+  const t=await fetch("https://api-m.sandbox.paypal.com/v1/oauth2/token",{method:"POST",headers:{Authorization:"Basic "+Buffer.from(clientId+":"+secret).toString("base64"),"Content-Type":"application/x-www-form-urlencoded"},body:"grant_type=client_credentials"});
+  const token=await t.json();if(!t.ok||!token.access_token)return json(res,502,{error:"PayPal authentication failed"});
+  const cap=await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders/"+encodeURIComponent(paypalOrderId)+"/capture",{method:"POST",headers:{Authorization:"Bearer "+token.access_token,"Content-Type":"application/json","PayPal-Request-Id":orderId},body:"{}"});
+  const data=await cap.json().catch(()=>({}));
+  if(!cap.ok&&data.name!=="ORDER_ALREADY_CAPTURED")return json(res,502,{error:"PayPal capture failed"});
+  const check=await fetch("https://api-m.sandbox.paypal.com/v2/checkout/orders/"+encodeURIComponent(paypalOrderId),{headers:{Authorization:"Bearer "+token.access_token}});
+  const pp=await check.json().catch(()=>({}));
+  const unit=pp.purchase_units?.[0], captures=unit?.payments?.captures||[];
+  const paid=captures.some(c=>c.status==="COMPLETED"&&c.amount?.currency_code==="USD"&&Number(c.amount.value)===Number(order.unit_price));
+  if(!check.ok||pp.status!=="COMPLETED"||unit?.reference_id!==orderId||unit?.invoice_id!==order.order_number||!paid)return json(res,409,{error:"Payment not verified"});
+  const update=await fetch(base+"/rest/v1/orders?id=eq."+encodeURIComponent(orderId)+"&status=eq.awaiting_payment&select=id,status",{method:"PATCH",headers:{...headers,Prefer:"return=representation"},body:JSON.stringify({status:"paid"})});
+  if(!update.ok)return json(res,502,{error:"Payment verified but order update failed"});
+  return json(res,200,{success:true,orderId,status:"paid"});
+ }catch(e){console.error("PayPal capture",e?.message);return json(res,502,{error:"Payment verification temporarily unavailable"});}
+}
+
 async function createPayPalOrder(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method !== "POST") {
@@ -87,6 +134,7 @@ async function createPayPalOrder(req, res) {
 }
 
 export default async function handler(req, res) {
+  if (req.method === 'POST' && req.body?.action === 'capture') return capturePayPalOrder(req, res);
   if (req.method === 'POST') return createPayPalOrder(req, res);
   if (req.method !== "GET") {
     res.setHeader("Allow", "GET");
