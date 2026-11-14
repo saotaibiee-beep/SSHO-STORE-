@@ -15,7 +15,7 @@ async function notifyAdminsOfPurchase({ botToken, baseUrl, serviceKey, user, res
     const esc = x => String(x ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
     const username = user.username ? `@${user.username}` : "غير متوفر";
     const message = `🛒 <b>طلب شراء جديد — SSHO STORE</b>\n\n🧾 رقم الطلب: <code>${esc(result.order_number)}</code>\n📦 المنتج: ${esc(products[0]?.name || productId)}\n💰 المبلغ: ${esc(result.charged_amount)} ${esc(result.currency)}\n👤 العميل: ${esc([user.first_name, user.last_name].filter(Boolean).join(" ") || "عميل تيليجرام")}\n🔗 الحساب: ${esc(username)}\n🆔 Telegram ID: <code>${esc(user.id)}</code>\n📌 الحالة: مدفوع — بانتظار التسليم`;
-    const recipients = [...new Set(admins.map(a => String(a.telegram_id || "")).filter(x => /^\\d+$/.test(x)))];
+    const recipients = [...new Set(admins.map(a => String(a.telegram_id || "")).filter(x => /^[0-9]+$/.test(x)))];
     const outcomes = await Promise.all(recipients.map(async chat_id => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
