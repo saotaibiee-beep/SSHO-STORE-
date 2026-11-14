@@ -544,7 +544,7 @@ function showProduct(id){
    <section class="product-detail-section product-usage-section"><h4><span>✓</span> طريقة الاستخدام</h4>${formatUsageSteps(usage)}</section>
    <div class="product-details-actions">
     <button type="button" class="primary product-buy-balance" id="buyFromBalanceBtn" ${unavailable?"disabled":""} onclick="requestPurchase('${escapeHtml(p.id)}')"><span>شراء من الرصيد</span><strong>${escapeHtml(currency)} ${money(p.price)}</strong></button>
-    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${(unavailable||Number(p.price)===0)?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')"><span>شراء عبر USDT</span><strong>${money(p.price)} USDT</strong></button>
+    <button type="button" class="secondary product-buy-usdt" id="buyWithUsdtBtn" ${unavailable?"disabled":""} onclick="requestProductUsdt('${escapeHtml(p.id)}')"><span>شراء عبر USDT</span><strong>${money(p.price)} USDT</strong></button>
    </div>
   </div>`;
  openModal();
@@ -577,7 +577,7 @@ async function requestPurchase(id){
   const r=await fetch("/api/orders",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"tma "+initData},body:JSON.stringify({productId:id,idempotencyKey})});
   const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||"تعذر إتمام الشراء");
   closeModal();if(typeof window.refreshSSHOWalletBalance==="function")await window.refreshSSHOWalletBalance();
-  showToast(d.duplicate?"هذا الطلب مسجل مسبقاً":Number(p.price)===0?"تم تسجيل الطلب التجريبي مجاناً":"تم الشراء وخصم الرصيد بنجاح");await loadOrders();go("orders");
+  showToast(d.duplicate?"هذا الطلب مسجل مسبقاً":"تم الشراء وخصم الرصيد بنجاح");await loadOrders();go("orders");
  }catch(e){console.error("Purchase error:",e);showToast(e.message||"تعذر إتمام الشراء");if(button){button.disabled=false;button.textContent="شراء من الرصيد";}}
 }
   async function loadOrders(){
