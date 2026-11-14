@@ -1,5 +1,40 @@
 import { verifyTelegramInitData } from "./_lib/telegram.js";
 
+
+async function notifyAdminsOfPurchase({ botToken, baseUrl, serviceKey, user, result, productId }) {
+  if (!botToken || !result?.ok || result.duplicate) return;
+  try {
+    const headers = { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` };
+    const [adminsRes, productRes] = await Promise.all([
+      fetch(`${baseUrl}/rest/v1/admin_roles?active=eq.true&role=in.(owner,admin)&select=telegram_id&limit=10`, { headers }),
+      fetch(`${baseUrl}/rest/v1/products?id=eq.${encodeURIComponent(productId)}&select=name&limit=1`, { headers })
+    ]);
+    if (!adminsRes.ok || !productRes.ok) throw new Error("Notification lookup failed");
+    const admins = await adminsRes.json();
+    const products = await productRes.json();
+    const esc = x => String(x ?? "").replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+    const username = user.username ? `@${user.username}` : "غير متوفر";
+    const message = `🛒 <b>طلب شراء جديد — SSHO STORE</b>\n\n🧾 رقم الطلب: <code>${esc(result.order_number)}</code>\n📦 المنتج: ${esc(products[0]?.name || productId)}\n💰 المبلغ: ${esc(result.charged_amount)} ${esc(result.currency)}\n👤 العميل: ${esc([user.first_name, user.last_name].filter(Boolean).join(" ") || "عميل تيليجرام")}\n🔗 الحساب: ${esc(username)}\n🆔 Telegram ID: <code>${esc(user.id)}</code>\n📌 الحالة: مدفوع — بانتظار التسليم`;
+    const recipients = [...new Set(admins.map(a => String(a.telegram_id || "")).filter(x => /^\\d+$/.test(x)))];
+    const outcomes = await Promise.all(recipients.map(async chat_id => {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      try {
+        const r = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+          method: "POST", headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id, text: message, parse_mode: "HTML", disable_web_page_preview: true }),
+          signal: controller.signal
+        });
+        const body = await r.json().catch(() => null);
+        return r.ok && body?.ok;
+      } finally { clearTimeout(timeout); }
+    }));
+    if (!recipients.length || outcomes.some(ok => !ok)) console.error("Purchase notification not delivered to all admins");
+  } catch (e) {
+    console.error("Purchase notification failed", e?.message);
+  }
+}
+
 export default async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
 
@@ -276,6 +311,7 @@ export default async function handler(req, res) {
       return res.status(502).json({ error: "تعذر إتمام الشراء بأمان. لم يُعتمد الطلب." });
     }
 
+    await notifyAdminsOfPurchase({ botToken, baseUrl, serviceKey, user, result, productId });
     return res.status(201).json(result);
   } catch (error) {
     console.error("Order request failed", error?.message);
