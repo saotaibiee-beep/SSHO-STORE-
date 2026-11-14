@@ -278,7 +278,7 @@ export default async function handler(req, res) {
 
   try {
     const response = await fetch(
-      `${baseUrl}/rest/v1/rpc/${productId === "9b3435a4-8c15-4610-a407-e84761020068" ? "create_free_test_order" : "create_store_order"}`,
+      `${baseUrl}/rest/v1/rpc/create_store_order`,
       {
         method: "POST",
         headers: {
